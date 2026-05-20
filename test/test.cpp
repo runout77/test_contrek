@@ -45,7 +45,12 @@ double now_ms() {
   ).count();
 }
 
-int main() {
+int main(int argc, char* argv[]) {
+  bool use_tree = false;
+  for (int i = 1; i < argc; i++) {
+    if (std::string(argv[i]) == "--tree") use_tree = true;
+  }
+
   std::vector<ImageInfo> images = {
       {"test_1024x1024", 1024, 1024},
       {"test_4096x4096", 4096, 4096},
@@ -63,7 +68,7 @@ int main() {
   cfg.tiles = 8;
   cfg.compress_unique = true;
   cfg.connectivity_mode = Contrek::Connectivity::OMNIDIRECTIONAL;
-  //cfg.treemap = true; // this is similar to cv::RETR_TREE
+  cfg.treemap = use_tree;
 
   for (auto &imgInfo : images) {
     std::string path = "../images/" + imgInfo.name + ".png";
@@ -94,7 +99,7 @@ int main() {
 
     std::vector<std::vector<cv::Point>> contours;
     std::vector<cv::Vec4i> hierarchy;
-    cv::findContours(mask, contours, hierarchy, cv::RETR_CCOMP, cv::CHAIN_APPROX_SIMPLE);
+    cv::findContours(mask, contours, hierarchy, use_tree ? cv::RETR_TREE : cv::RETR_CCOMP, cv::CHAIN_APPROX_SIMPLE);
     
     int external_count = 0;
     int hole_count = 0;
@@ -116,7 +121,7 @@ int main() {
     });
   }
 
-  std::ofstream html("benchmark_results.html");
+  std::ofstream html("cpp_benchmark_results.html");
 
 html << "<!DOCTYPE html><html><head><meta charset='UTF-8'>"
     << "<style>"
@@ -129,7 +134,7 @@ html << "<!DOCTYPE html><html><head><meta charset='UTF-8'>"
     << ".opencv-col { background-color: #fffdf2; }"
     << ".setup-cell { text-align: center; font-family: monospace; color: #666; font-weight: bold; }"
     << ".winner-label { font-weight: bold; text-align: center; font-size: 9px; padding: 2px 4px; border-radius: 4px; }"
-    << ".winner-ct { background: #d4edda; color: #155724; }"
+    << ".winner-ct { background: #d4edda; color: #155724; box-shadow: 0 0 6px 3px rgba(255, 0, 0, 0.5);}"
     << ".winner-cv { background: #ffeeba; color: #856404; }"
     << ".ratio-pill { padding: 4px 8px; border-radius: 12px; font-size: 11px; font-weight: bold; display: inline-block; min-width: 40px; }"
     << ".good { background: #2ecc71; color: white; }"
@@ -137,6 +142,7 @@ html << "<!DOCTYPE html><html><head><meta charset='UTF-8'>"
     << "</style></head><body>";
 
   html << "<h1 style='color: #232f3e;'>🚀 Contrek vs OpenCV: Native Benchmark Report</h1>";
+  html << "<p>Mode: <b>" << (use_tree ? "RETR_TREE / treemap=true" : "RETR_CCOMP / treemap=false") << "</b></p>";
   html << "<table><thead>";
   html << "<tr><th rowspan='2'>Target Image</th><th rowspan='2'>MP</th>"
     << "<th colspan='7'>CONTREK ENGINE</th>"

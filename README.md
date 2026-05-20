@@ -32,7 +32,7 @@ Once inside the container shell, run the setup script to install Ruby dependenci
 ```bash
 ./build.sh
 ```
-To ensure you are aligned with the latest core updates, it is recommended to run gem update contrek).
+To ensure you are aligned with the latest core updates, it is recommended to run gem update contrek.
 ```bash
 gem update contrek
 ```
@@ -47,6 +47,13 @@ python3 test_opencv.py
 ```
 Results will be aggregated into a **test/report.html** file.
 
+See other options by
+```Bash
+ruby test_contrek.rb --help
+```
+
+The Python script supports the --tree option too which uses cv2.RETR_TREE in place of cv2.RETR_CCOMP (similar to the Contrek's `treemap: true` flag).
+
 ### Visual Validation:
 To verify the precision of the results graphically, add the --draw flag:
 
@@ -55,6 +62,9 @@ ruby test_contrek.rb --draw
 python3 test_opencv.py --draw
 ```
 The resulting images will be saved in the **test/output** directory. This process may take several minutes on the ruby side.
+
+### Treemaps compare script
+A ruby script to compare treemaps is provided: `compare_treemaps.rb`
 
 ### Executing Low-Level Tests (Native C++)
 For a direct comparison between the C++ cores:
@@ -70,6 +80,21 @@ cd build
 ./contrek_opencv_benchmark
 ```
 Note: It is recommended to run the tests multiple times; initial runs may be slower due to library memory allocation and caching.
+
+Run the benchmark using hierarchical contour retrieval mode.
+
+| Flag | OpenCV mode | Contrek flag |
+|------|-------------|--------------|
+| *(absent)* | `cv::RETR_CCOMP` | `cfg.treemap = false` |
+| `--tree` | `cv::RETR_TREE` | `cfg.treemap = true` |
+
+**Usage:**
+```bash
+./contrek_opencv_benchmark --tree    # RETR_TREE + cfg.treemap=true
+```
+
+In `RETR_CCOMP` mode contours are organized in a two-level hierarchy (external + holes).
+In `RETR_TREE` mode the full parent-child nesting tree is reconstructed.
 
 ### 4. Benchmark Results
 The following data was obtained in a virtualized environment (VMware Virtual Machine) featuring an AMD Ryzen 7 3700X 8-Core Processor (BogoMIPS: 7199.99) on an Ubuntu distribution.

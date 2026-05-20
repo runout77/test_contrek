@@ -2,48 +2,63 @@ require 'contrek'
 require 'rmagick'
 require 'nokogiri'
 require 'etc'
-
-PIXEL_PER_THREAD = 2000
+require 'optparse'
+require 'json'
 
 Magick.limit_resource(:memory, 8_000_000_000)
 Magick.limit_resource(:map,    8_000_000_000)
 Magick.limit_resource(:disk,   16_000_000_000)
 
-draw_image = ARGV.include?('--draw')
-
-images = [
-  {'image': 'test_1024x1024', 'w': 1024, 'h': 1024, 'threads': 2, 'tiles': 2},
-  {'image': 'test_4096x4096', 'w': 4096, 'h': 4096, 'threads': 8, 'tiles': 8},
-  {'image': 'test_10000x10000', 'w': 10000, 'h': 10000, 'threads': 8, 'tiles': 8},
-  {'image': 'test_10240x10240', 'w': 10240, 'h': 10240, 'threads': 8, 'tiles': 8},
-  {'image': 'test_10240x10240_2', 'w': 10240, 'h': 10240, 'threads': 8, 'tiles': 8},
-  {'image': 'test_15360x15360', 'w': 15360, 'h': 15360, 'threads': 8, 'tiles': 8},
-  {'image': 'test_20480x20480', 'w': 20480, 'h': 20480, 'threads': 8, 'tiles': 8},
-]
 n_cores = Etc.nprocessors
+options = {tiles: n_cores, threads: n_cores, treemap: nil}
+OptionParser.new do |opts|
+  opts.banner = "Usage: test_contrek.rb [opts]"
+  opts.on("-d", "--draw", "Draws into a png image founded polygons.") do |v|
+    options[:draw] = v
+  end
+  opts.on("-t", "--treemap", "Build hierarchy map of founded polygons") do |f|
+    options[:treemap] = f
+  end
+  opts.on("--tiles number_of_tiles", "Number of tiles to divide image (default: #{options[:tiles]})") do |f|
+    options[:tiles] = f.to_i
+  end
+  opts.on("--threads number_of_threads", "Number of threads involved (default: #{options[:threads]})") do |f|
+    options[:threads] = f.to_i
+  end
+  opts.on("-j","--json", "Stores result as json structure") do |f|
+    options[:json] = f
+  end
+end.parse!
+puts "Options = #{options.inspect}"
+images = [
+  {'image': 'test_1024x1024', 'w': 1024, 'h': 1024},
+  {'image': 'test_4096x4096', 'w': 4096, 'h': 4096},
+  {'image': 'test_10000x10000', 'w': 10000, 'h': 10000},
+  {'image': 'test_10240x10240', 'w': 10240, 'h': 10240},
+  {'image': 'test_10240x10240_2', 'w': 10240, 'h': 10240},
+  {'image': 'test_15360x15360', 'w': 15360, 'h': 15360},
+  {'image': 'test_20480x20480', 'w': 20480, 'h': 20480},
+]
 
 images.each do |image|
   image_path = "images/#{image[:image]}.png"
-  puts "Processing #{image_path} ...."
+  puts "Processing #{image_path} .... "
+  
   exclude_color = { r: 255, g: 255, b: 255, a: 255 }
-
-  num_threads = (image[:w].to_f / PIXEL_PER_THREAD).ceil
-  num_threads = (num_threads.to_f / 2).ceil * 2
-  num_threads = n_cores if num_threads > n_cores
-  #image[:threads] = image[:tiles] = num_threads
   start_time = Time.now
 
   result = Contrek.contour!(
     png_file_path: image_path,
     options: {
-      number_of_threads: image[:threads],
+      number_of_threads: options[:threads],
       class: "value_not_matcher",
       color: exclude_color,
       finder: {
         connectivity: 8,
-        number_of_tiles: image[:tiles],
-        compress: { uniq: true }
-      }
+        number_of_tiles: options[:tiles],
+        compress: { uniq: true },
+        treemap: options[:treemap]
+      }.compact
     }
   )
   polygons = result.polygons
@@ -56,7 +71,7 @@ images.each do |image|
 
 
 ### IMAGE
-  if draw_image
+  if options[:draw]
     canvas = Magick::Image.new(image[:w], image[:h]) do |options|
       options.background_color = 'white' 
     end
@@ -80,6 +95,17 @@ images.each do |image|
     gc.draw(canvas)
     canvas.write("output/#{image[:image]}_contrek.png")
     canvas.destroy!
+  end
+
+## JSON output
+  if options[:json]
+    output = result.polygons.each_with_index.map do |polygon, i|
+      { outer: polygon[:outer].each_slice(2).map { |x, y| { x: x, y: y } },
+        inner: polygon[:inner].map{|inner| inner.each_slice(2).map { |x, y| { x: x, y: y } }},
+        treemap: result.metadata[:treemap][i]
+      }
+    end
+    File.write("output/#{image[:image]}_contrek.json", JSON.pretty_generate(output))
   end
 end
 
@@ -124,7 +150,7 @@ if tbody
     ruby_cell = doc.at_css("tr[count='#{target_cell.nil? ? (current_count + 1) : current_count}'] td[type='ruby'].pending.#{image_id}")
     if ruby_cell
       formatted_time = sprintf("%.6f s", entry[:time])
-      ruby_content = "#{formatted_time} (polylines outer=#{entry[:outer]}, inner=#{entry[:inner]}, threads/tiles=#{entry[:threads]}/#{entry[:tiles]})"
+      ruby_content = "#{formatted_time} (polylines outer=#{entry[:outer]}, inner=#{entry[:inner]}, threads/tiles=#{options[:threads]}/#{options[:tiles]})"
       ruby_cell.content = ruby_content
       ruby_cell['class'] = image_id
     end
