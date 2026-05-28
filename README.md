@@ -21,6 +21,19 @@ While OpenCV is the industry standard for single-threaded efficiency, Contrek ex
 
 Contrek is not intended as a general-purpose replacement for OpenCV, but rather as a specialized high-performance tool for scenarios where single-image speed and memory scalability are the primary constraints.
 
+## 3. Setup and Execution
+
+### Build and Launch via Docker
+The entire environment is fully containerized to ensure cross-platform compatibility and reproducible results. Build the system and launch the interactive testing shell using:
+
+```bash
+# Build the image using Docker Compose
+sudo docker compose build test
+
+# Run and enter the container shell
+sudo docker compose run test
+```
+
 ### Internal Configuration
 Once inside the container shell, run the setup script to install Ruby dependencies:
 
@@ -70,7 +83,8 @@ cd test
 cd build
 ./contrek_opencv_benchmark
 ```
-This script downloads the source code, compiles it via CMake, and launches the benchmarks. For subsequent runs:
+This script downloads the source code, compiles it via CMake, and launches the benchmarks. Will create an html report cpp_benchmark_results.html under build directory.
+For subsequent runs:
 
 ```Bash
 cd build
@@ -177,7 +191,12 @@ cd build
 ./streaming_benchmark
 ```
 
-> 📌 **Output Note:** The extraction process generates a `whole.svg` file inside the `build` folder containing the rendered vector output. To easily verify topological precision, outer boundaries are colored in **red** and inner holes (voids) in **green**.
+By default, the benchmark runs in **pure computation mode** to measure raw CPU performance without disk write overhead. You can pass command-line flags to conditionally export the output files outside the core processing timer:
+
+* **Pure Benchmark (Fast):** `./streaming_benchmark` (Disk writes are skipped).
+* **Export Vector Map:** `./streaming_benchmark --svg` (Generates a `whole.svg` file).
+
+> 📌 **Output Note:** The extraction process generates a `whole.svg` (--svg option) file inside the `build` folder containing the rendered vector output. To easily verify topological precision, outer boundaries are colored in **red** and inner holes (voids) in **green**.
 
 > *Note on viewing:* Due to the massive size of the generated vector file (~217k detailed polygons), it can be opened and viewed directly in Google Chrome, though you may experience occasional, temporary application freezes (locks).
 

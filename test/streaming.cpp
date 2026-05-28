@@ -26,7 +26,7 @@ double now_ms() {
   ).count();
 }
 
-void stream_png_image(const std::string& filepath, uint32_t stripe_height) {
+void stream_png_image(const std::string& filepath, uint32_t stripe_height, bool generate_svg, bool generate_png) {
     std::vector<ProcessResult*> result_clones;
     std::vector<std::string> varguments = {};
     VerticalMerger vmerger(0, &varguments);
@@ -107,15 +107,20 @@ void stream_png_image(const std::string& filepath, uint32_t stripe_height) {
     if (merged_result) {
       std::cout << "Found total polygons: " << merged_result->groups << std::endl;
       //merged_result->print_info();
-      /*RawBitmap full_bitmap;
-      full_bitmap.define(total_width, total_height, 4, true);
-      full_bitmap.fill(255, 255, 255);
-      merged_result->draw_on_bitmap(full_bitmap);
-      std::cout << "Saving whole png ..." << std::endl;
-      if (full_bitmap.save_to_png("whole.png")) {
-        std::cout << "Png saved!" << std::endl;
-      }*/
-      merged_result->save_svg("whole.svg");
+      if (generate_png) {
+        RawBitmap full_bitmap;
+        full_bitmap.define(total_width, total_height, 4, true);
+        full_bitmap.fill(255, 255, 255);
+        merged_result->draw_on_bitmap(full_bitmap);
+        std::cout << "Saving whole png ..." << std::endl;
+        if (full_bitmap.save_to_png("whole.png")) {
+          std::cout << "Png saved!" << std::endl;
+        }
+      }
+      if (generate_svg) {
+        merged_result->save_svg("whole.svg");
+        std::cout << "Svg saved!" << std::endl;
+      }
     }
     delete merged_result;
     // frees memory
@@ -127,14 +132,26 @@ void stream_png_image(const std::string& filepath, uint32_t stripe_height) {
 }
 
 int main(int argc, char* argv[]) {
+  bool generate_svg = false;
+  bool generate_png = false;
+  for (int i = 1; i < argc; ++i) {
+    std::string arg = argv[i];
+    if (arg == "--svg") {
+      generate_svg = true;
+    } else if (arg == "--png") {
+      generate_png = true;
+    }
+  }
+
   std::cout << "Initial memory usage: " << get_peak_rss() << " MB\n";
   double start_time = now_ms();
 
-  stream_png_image("../images/test_40960x40960.png", 2000);
+  stream_png_image("../images/test_40960x40960.png", 2000, generate_svg, generate_png);
   //stream_png_image("../images/test_1024x1024.png", 300);
 
   double end_time = now_ms();
   double total_time = end_time - start_time;
   std::cout << "Execution time: " << total_time << " ms " << std::endl;
   std::cout << "Memory usage peak: " << get_peak_rss() << " MB" << std::endl;
+  return 0;
 }
