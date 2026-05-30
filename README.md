@@ -150,6 +150,13 @@ The following data was obtained in a virtualized environment (VMware Virtual Mac
 * **Efficiency Balance:** OpenCV remains highly efficient on single-core tasks, while Contrek's multi-threaded architecture shines as image complexity and resolution scale up.
 * OpenCV remains the industry standard for general-purpose computer vision. Contrek is a specialized engine designed specifically to optimize latency and memory on extreme-resolution single images.
 
+### 📂 Benchmark Methodology (Cold vs. Warm Runs)
+
+To ensure maximum accuracy, eliminate OS thread scheduling noise, and bypass transient caching effects, the benchmark is executed **11 consecutive times**.
+
+
+🌐 [Live report](./docs/multiple_runs.html)
+
 ## 3. Advanced Techniques & Demonstration Tools
 
 ### Ultra-High Resolution: The "SPNG + Contrek" Streaming Technique
