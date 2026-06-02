@@ -1,21 +1,28 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-mkdir -p images
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 
-download_if_missing() {
-  local file="$1"
-  local url="$2"
+mkdir -p "$REPO_ROOT/images"
 
-  if [ -f "images/$file" ]; then
-    echo "[OK] images/$file already present"
-    return
-  fi
+BASE_URL="https://github.com/runout77/test_opencv_contrek/releases/download/test-assets-v1"
 
-  echo "[DOWNLOAD] $file"
-  curl -L --fail "$url" -o "images/$file"
-}
+FILES=(
+    "test_81920x81920.png"
+)
 
-download_if_missing \
-  test_81920x81920.png \
-  "https://github.com/runout77/test_opencv_contrek/releases/download/test-assets-v1/test_81920x81920.png"
+for FILE in "${FILES[@]}"; do
+
+    if [ -f "$REPO_ROOT/images/$FILE" ]; then
+        echo "[OK] $FILE already present"
+        continue
+    fi
+
+    echo "[DOWNLOAD] $FILE"
+
+    curl -L --fail \
+        "$BASE_URL/$FILE" \
+        -o "$REPO_ROOT/images/$FILE"
+
+done

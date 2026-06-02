@@ -6,6 +6,7 @@
 #include <sys/resource.h>
 #include <fstream>
 #include <spng.h>
+#include <filesystem>
 #include "ContrekApi.h"
 #include "polygon/finder/concurrent/VerticalMerger.h"
 
@@ -132,6 +133,8 @@ void stream_png_image(const std::string& filepath, uint32_t stripe_height, bool 
 }
 
 int main(int argc, char* argv[]) {
+  std::string image_path = "../images/test_40960x40960.png";
+  int stripe_height = 2000;
   bool generate_svg = false;
   bool generate_png = false;
   for (int i = 1; i < argc; ++i) {
@@ -140,14 +143,43 @@ int main(int argc, char* argv[]) {
       generate_svg = true;
     } else if (arg == "--png") {
       generate_png = true;
+    } else if (arg == "--image" && i + 1 < argc) {
+      std::string image_name = argv[++i];
+
+      if (image_name.find('/') != std::string::npos ||
+          image_name.find('\\') != std::string::npos) {
+        image_path = image_name;
+      } else {
+        image_path = "../../images/" + image_name;
+      }
+    } else if (arg == "--stripe-height" && i + 1 < argc) {
+      stripe_height = static_cast<uint32_t>(std::stoul(argv[++i]));
+    } else if (arg == "--help" || arg == "-h") {
+      std::cout
+        << "Usage: " << argv[0]
+        << " [--image FILE_OR_PATH] [--stripe-height N] [--svg] [--png]\n"
+        << "\n"
+        << "Default image: ../images/test_40960x40960.png\n"
+        << "Large test images must be downloaded first. See README.\n";
+      return 0;
     }
   }
 
+  if (!std::filesystem::exists(image_path)) {
+    std::cerr
+      << "Missing test image: " << image_path << "\n"
+      << "Large test images must be downloaded first. See README.\n";
+    return 1;
+  }
+
+  std::cout << "Image: " << image_path << std::endl;
   std::cout << "Initial memory usage: " << get_peak_rss() << " MB\n";
+  std::cout << "Stripe height: " << stripe_height << std::endl;
   double start_time = now_ms();
 
-  stream_png_image("../images/test_40960x40960.png", 2000, generate_svg, generate_png);
-  //stream_png_image("../images/test_1024x1024.png", 300);
+  // image_path = "../images/test_1024x1024.png";
+
+  stream_png_image(image_path, stripe_height, generate_svg, generate_png);
 
   double end_time = now_ms();
   double total_time = end_time - start_time;

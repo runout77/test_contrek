@@ -207,4 +207,31 @@ By default, the benchmark runs in **pure computation mode** to measure raw CPU p
 
 > *Note on viewing:* Due to the massive size of the generated vector file (~217k detailed polygons), it can be opened and viewed directly in Google Chrome, though you may experience occasional, temporary application freezes (locks).
 
-<center><img src="./docs/streaming_test.jpg" alt="Streaming" width="90%"/></center>
+<center><img src="./docs/streaming_test.jpg" alt="Streaming" width="70%"/></center>
+
+To test an image of bigger scale, run the following commands from the repository root:
+```Bash
+./scripts/download_test_assets.sh
+```
+This script will download several very large images into the images/ directory.
+
+Then, run the benchmark:
+```Bash
+./streaming_benchmark --image test_81920x81920.png
+./streaming_benchmark --help # for more options
+```
+
+Ecco il risultato sulla medesima macchina
+
+```text
+[Results]
+- Total polygons found: 869,932
+- Pure Execution time:  93,970 ms (94 seconds) *
+- Peak Memory Usage:    12 GB
+- Output File Size:     2.3 GB    (whole.svg)
+```
+
+### Performance Analysis
+As shown by the results, the algorithm scales **almost perfectly linearly (O(N))**. When transitioning from the 40k to the 81k image—which is a 4x grid collage of the 40k image generated via `libvips`, as it was the only viable way to build such a massive file on a standard home desktop—the number of detected polygons, execution time, RAM usage, and output size all scale by a precise factor of 4. This proves the high efficiency and stability of the contour extraction under extreme workloads.
+
+<center><img src="./docs/streaming_81920_test.jpg" alt="Streaming" width="70%"/></center>

@@ -5,3 +5,5 @@ test/build/*
 test/contrek_core/*
 !test/contrek_core/.gitkeep
 report.html
+images/*
+!images/.gitkeep
