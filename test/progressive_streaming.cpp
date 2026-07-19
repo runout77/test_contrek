@@ -99,7 +99,7 @@ void stream_progressive_png_image(const std::string& filepath, uint32_t stripe_h
         std::vector<std::string> finder_arguments = {
           "--versus=a",
           "--bounds",
-          "--strict_bounds",  // <- this option is strictly needed when working with vertical merger
+          "--connectivity=8",
           "--compress_uniq",
           "--compress_linear"
         };

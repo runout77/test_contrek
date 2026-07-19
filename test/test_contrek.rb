@@ -10,6 +10,7 @@ Magick.limit_resource(:map,    8_000_000_000)
 Magick.limit_resource(:disk,   16_000_000_000)
 
 n_cores = Etc.nprocessors
+n_cores = 8 if n_cores > 8
 options = {tiles: n_cores, threads: n_cores, treemap: nil}
 OptionParser.new do |opts|
   opts.banner = "Usage: test_contrek.rb [opts]"

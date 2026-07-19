@@ -162,6 +162,8 @@ Output
 - SVG size:            7.22 GB
 ```
 
+> 📌 **Output Note:** Starting from version 1.34 of Contrek Library, processing times, polygon counts, and other data may vary. This is due to a fundamental restructuring of the tracking algorithm, which is now based on a 4-vertex pixel-cell topology.
+
 #### Architecture Overview
 
 Unlike the previous benchmark, no complete polygon map is accumulated before SVG generation.
