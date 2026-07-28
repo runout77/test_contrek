@@ -74,7 +74,7 @@ int main(int argc, char* argv[]) {
   cfg.treemap = use_tree;
 
   for (auto &imgInfo : images) {
-    std::string path = "../images/" + imgInfo.name + ".png";
+    std::string path = "../../images/" + imgInfo.name + ".png";
     std::cout << "=== Processing " << path << " ===" << std::endl;
     // --- CONTREK ---
     double start_c = now_ms();

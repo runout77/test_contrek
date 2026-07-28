@@ -59,3 +59,25 @@ target_include_directories(progressive_streaming_benchmark PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/contrek_core
 )
 target_link_libraries(progressive_streaming_benchmark PRIVATE ${COMMON_LIBS})
+
+# =================================================================
+# 4. GDAL Test
+# =================================================================
+find_package(GDAL REQUIRED)
+if(GDAL_FOUND)
+    message(STATUS "GDAL found: ${GDAL_VERSION}")
+else()
+    message(FATAL_ERROR "GDAL not found")
+endif()
+add_executable(gdal_test gdal_test.cpp)
+target_include_directories(gdal_test PRIVATE 
+    ${OpenCV_INCLUDE_DIRS}
+    ${GDAL_INCLUDE_DIRS}
+    ${CMAKE_CURRENT_SOURCE_DIR}/contrek_core
+)
+target_link_libraries(gdal_test PRIVATE 
+    ${COMMON_LIBS}
+    ${GDAL_LIBRARIES}
+)
+find_package(nlohmann_json REQUIRED)
+target_link_libraries(gdal_test PRIVATE nlohmann_json::nlohmann_json)

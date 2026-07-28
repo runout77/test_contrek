@@ -29,8 +29,8 @@ double now_ms() {
 
 void stream_png_image(const std::string& filepath, uint32_t stripe_height, bool generate_svg, bool generate_png) {
     std::vector<ProcessResult*> result_clones;
-    std::vector<std::string> varguments = {};
-    VerticalMerger vmerger(0, &varguments);
+    Options varguments = {};
+    VerticalMerger vmerger(0, varguments);
 
     // opens image to stream
     FILE* fp = fopen(filepath.c_str(), "rb");
@@ -86,10 +86,10 @@ void stream_png_image(const std::string& filepath, uint32_t stripe_height, bool 
         if (ret != 0 && ret != SPNG_EOI) break;
       }
       // stripe contour tracing
-      std::vector<std::string> finder_arguments = {
-        "--versus=a",
+      Options finder_options = {
+        {"versus", Identifier{"a"}},
       };
-      PolygonFinder polygon_finder(&stripe_bitmap, &not_matcher, nullptr, &finder_arguments);
+      PolygonFinder polygon_finder(&stripe_bitmap, &not_matcher, nullptr, finder_options);
       ProcessResult *result = polygon_finder.process_info();
       if (result) {
         std::cout << "stripe " << stripe_count << ": found polygons " << result->groups << std::endl;
@@ -130,7 +130,7 @@ void stream_png_image(const std::string& filepath, uint32_t stripe_height, bool 
 }
 
 int main(int argc, char* argv[]) {
-  std::string image_path = "../images/test_40960x40960.png";
+  std::string image_path = "../../images/test_40960x40960.png";
   int stripe_height = 2000;
   bool generate_svg = false;
   bool generate_png = false;
@@ -156,7 +156,7 @@ int main(int argc, char* argv[]) {
         << "Usage: " << argv[0]
         << " [--image FILE_OR_PATH] [--stripe-height N] [--svg] [--png]\n"
         << "\n"
-        << "Default image: ../images/test_40960x40960.png\n"
+        << "Default image: ../../images/test_40960x40960.png\n"
         << "Large test images must be downloaded first. See README.\n";
       return 0;
     }

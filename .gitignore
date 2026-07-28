@@ -7,3 +7,11 @@ test/contrek_core/*
 report.html
 images/*
 !images/.gitkeep
+!images/test_10000x10000.png
+!images/test_10240x10240.png
+!images/test_10240x10240_2.png
+!images/test_1024x1024.png
+!images/test_15360x15360.png
+!images/test_20480x20480.png
+!images/test_40960x40960.png
+!images/test_4096x4096.png

@@ -99,7 +99,7 @@ def build_contrek_treemap(contours, hierarchy):
   return treemap, opencv_to_poly
 
 for image in images:
-  image_path = f"images/{image['image']}.png" 
+  image_path = f"../images/{image['image']}.png" 
   print(f"Processing {image_path} ....")
   start = time.time()
   img = cv2.imread(image_path, cv2.IMREAD_UNCHANGED)

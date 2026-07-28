@@ -42,7 +42,7 @@ images = [
 ]
 
 images.each do |image|
-  image_path = "images/#{image[:image]}.png"
+  image_path = "../images/#{image[:image]}.png"
   puts "Processing #{image_path} .... "
   
   exclude_color = { r: 255, g: 255, b: 255, a: 255 }
