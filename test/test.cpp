@@ -138,7 +138,8 @@ html << "<!DOCTYPE html><html><head><meta charset='UTF-8'>"
     << ".setup-cell { text-align: center; font-family: monospace; color: #666; font-weight: bold; }"
     << ".winner-label { font-weight: bold; text-align: center; font-size: 9px; padding: 2px 4px; border-radius: 4px; }"
     << ".winner-ct { background: #d4edda; color: #155724; box-shadow: 0 0 6px 3px rgba(255, 0, 0, 0.5);}"
-    << ".winner-cv { background: #ffeeba; color: #856404; }"
+    << ".winner-cv { background: #ffeeba; color: #856404; box-shadow: 0 0 6px 3px rgba(255, 0, 0, 0.5);}"
+    << ".check { display:inline-block; color:#2ecc71; font-weight:bold; font-size:18px; text-align:center; margin-left:4px; }"
     << ".ratio-pill { padding: 4px 8px; border-radius: 12px; font-size: 11px; font-weight: bold; display: inline-block; min-width: 40px; }"
     << ".good { background: #2ecc71; color: white; }"
     << ".bad { background: #e67e22; color: white; }"
@@ -173,17 +174,17 @@ html << "<!DOCTYPE html><html><head><meta charset='UTF-8'>"
     html << "<td class='contrek-col'>" << r.c_holes << "</td>";
     html << "<td class='contrek-col setup-cell'>" << cfg.threads << "/" << cfg.tiles << "</td>";
     html << "<td class='contrek-col'>" << (int)r.c_time << "ms</td>";
-    html << "<td class='contrek-col'>" << (ct_speed_win ? "<span class='winner-label winner-ct'>WINNER</span>" : "-") << "</td>";
+    html << "<td class='contrek-col'>" << (ct_speed_win ? "<span class='winner-label winner-ct check'>\u2713</span>" : "-") << "</td>";
     html << "<td class='contrek-col'>" << (int)r.c_ram << "MB</td>";
-    html << "<td class='contrek-col'>" << (ct_ram_win ? "<span class='winner-label winner-ct'>EFFICIENT</span>" : "-") << "</td>";
+    html << "<td class='contrek-col'>" << (ct_ram_win ? "<span class='winner-label winner-ct check'>\u2713</span>" : "-") << "</td>";
 
     // --- OPENCV STATS ---
     html << "<td class='opencv-col'>" << r.o_external << "</td>";
     html << "<td class='opencv-col'>" << r.o_holes << "</td>";
     html << "<td class='opencv-col'>" << (int)r.o_time << "ms</td>";
-    html << "<td class='opencv-col'>" << (!ct_speed_win ? "<span class='winner-label winner-cv'>WINNER</span>" : "-") << "</td>";
+    html << "<td class='opencv-col'>" << (!ct_speed_win ? "<span class='winner-label winner-cv check'>\u2713</span>" : "-") << "</td>";
     html << "<td class='opencv-col'>" << (int)r.o_ram << "MB</td>";
-    html << "<td class='opencv-col'>" << (!ct_ram_win ? "<span class='winner-label winner-cv'>EFFICIENT</span>" : "-") << "</td>";
+    html << "<td class='opencv-col'>" << (!ct_ram_win ? "<span class='winner-label winner-cv check'>\u2713</span>" : "-") << "</td>";
 
     // --- RATIOS ---
     html << "<td><span class='ratio-pill " << (speed_ratio < 1.0 ? "good" : "bad") << "'>" 

@@ -158,7 +158,7 @@ ProcessResult* stream_progressive_png_image(const std::string& filepath, const s
       PolygonFinder polygon_finder(&stripe_bitmap, &not_matcher, nullptr, finder_options);
       ProcessResult *result = polygon_finder.process_info();
       if (result) {
-        std::cout << "stripe " << stripe_count << ": found polygons " << result->groups << std::endl;
+        //std::cout << "stripe " << stripe_count << ": found polygons " << result->groups << std::endl;
         vmerger.add_tile(*result, current_y_offset + lines_to_read >= total_height);
         delete result;
       }
@@ -166,7 +166,7 @@ ProcessResult* stream_progressive_png_image(const std::string& filepath, const s
       stripe_count++;
     }
     merged_result = vmerger.process_info();
-    std::cout << "total found polygons " << merged_result->groups << std::endl;
+    //std::cout << "total found polygons " << merged_result->groups << std::endl;
   } catch (const std::exception& e) {
     std::cerr << "\n[ERROR] Processing exception: " << e.what() << std::endl;
     if (shared_stream.is_open()) shared_stream.close();
