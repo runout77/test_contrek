@@ -27,7 +27,6 @@ RUN apt-get update && apt-get install -y \
     libtbb-dev \
     libeigen3-dev \
     libgdal-dev \
-    nlohmann-json3-dev \
     wget \
     unzip \
     && rm -rf /var/lib/apt/lists/*

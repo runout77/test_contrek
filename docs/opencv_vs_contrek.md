@@ -105,8 +105,21 @@ Run the benchmark using hierarchical contour retrieval mode.
 In `RETR_CCOMP` mode contours are organized in a two-level hierarchy (external + holes).
 In `RETR_TREE` mode the full parent-child nesting tree is reconstructed.
 
+### Very large dataset
+You can try massive images using the --image option (image are read from /images root directory)
+
+```bash
+OPENCV_IO_MAX_IMAGE_PIXELS=2147483647 ./contrek_opencv_benchmark --image test_40960x40960.png
+```
+
+### OpenCV Version and Build Infos
+
+```Bash
+./contrek_opencv_benchmark --info
+```
+
 ## Benchmark Results
-The following data was obtained in a virtualized environment (VMware Virtual Machine) featuring an AMD Ryzen 7 3700X 8-Core Processor (BogoMIPS: 7199.99) on an Ubuntu distribution.
+The following data was obtained on an AMD Ryzen 7 3700X 8-Core Processor (BogoMIPS: 7199.99) with 64 GB on an Ubuntu distribution.
 
 ### 📊 High-Level Benchmark Results (Ruby vs Python)
 *Test environment: Ruby (Contrek) vs Python (OpenCV)*
@@ -129,37 +142,23 @@ The following data was obtained in a virtualized environment (VMware Virtual Mac
 ### 🚀 Native Benchmark Results: Contrek vs OpenCV
 *Environment: Native C++ Engine | Configuration: 8 Threads / 8 Tiles*
 
-| Image Target | Res (MP) | Contrek Time | OpenCV Time | Speed Ratio | Contrek RAM | OpenCV RAM | RAM Ratio |
-| :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-| **test_1024x1024** | 1.0 | 18 ms | **13 ms** | 1.39x | **75 MB** | 89 MB | 0.84x |
-| **test_4096x4096** | 16.8 | **647 ms** | 842 ms | **0.77x** | **492 MB** | 508 MB | 0.97x |
-| **test_10000x10000** | 100.0 | **588 ms** | 646 ms | **0.91x** | **876 MB** | 969 MB | 0.90x |
-| **test_10240x10240** | 104.9 | **340 ms** | 479 ms | **0.71x** | 970 MB | 970 MB | 1.00x |
-| **test_10240x10240_2**| 104.9 | 507 ms | **426 ms** | 1.19x | 1090 MB | 1090 MB | 1.00x |
-| **test_15360x15360** | 235.9 | 938 ms | **903 ms** | 1.04x | **1594 MB** | 2040 MB | 0.78x |
-| **test_20480x20480** | 419.4 | **2259 ms** | 2748 ms | **0.82x** | 3379 MB | 3379 MB | 1.00x |
+👉 [Native Benchmarks table of results](https://runout77.github.io/test_contrek/cpp_benchmark_results.html)
 
 
 ### Tested Configuration
 
 - CPU: AMD Ryzen 7 3700X
 - Cores / Threads: 8 / 16
-- Environment: VMware Virtual Machine
 - OS: Ubuntu
 - Contrek threads: 8
 - Contrek tiles: 8
 
 ---
 
-**Performance Notes:**
-* **Latency Optimization:** Contrek shows a clear advantage in processing time on high-resolution targets (4k, 10k, 20k), proving the effectiveness of the parallel Stripe-Merging approach on single images.
-* **Memory Footprint:** On critical workloads like the 15k test (235MP), Contrek saved approximately **446 MB** of RAM compared to OpenCV.
-* **Efficiency Balance:** OpenCV remains highly efficient on single-core tasks, while Contrek's multi-threaded architecture shines as image complexity and resolution scale up.
-* OpenCV remains the industry standard for general-purpose computer vision. Contrek is a specialized engine designed specifically to optimize latency and memory on extreme-resolution single images.
-
 ### 📂 Benchmark Methodology (Cold vs. Warm Runs)
 
 To ensure maximum accuracy, eliminate OS thread scheduling noise, and bypass transient caching effects, the benchmark is executed **11 consecutive times**.
 
 
-🌐 [Live report](https://raw.githack.com/runout77/test_opencv_contrek/main/docs/multiple_runs.html)
+🌐 [Live report](https://runout77.github.io/test_contrek/multiple_runs.html)
+
