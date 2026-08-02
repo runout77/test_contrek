@@ -27,7 +27,7 @@ To bypass this physical hardware limitation, Contrek demonstrates its architectu
 
 This design pattern decouples memory growth from image dimensions. Memory consumption depends primarily on the selected stripe height rather than on the total image size.
 
-#### 🚀 Gigapixel Image Benchmark (`test_40960x40960.png`)
+#### Gigapixel Image Benchmark (`test_40960x40960.png`)
 The following benchmark demonstrates this streaming technique in action, handling a massive industrial workload:
 
 * **Image Resolution:** 40,960 × 40,960 pixels (**1.67 Billion Pixels**)
@@ -68,7 +68,7 @@ By default, the benchmark runs in **pure computation mode** to measure raw CPU p
 * **Pure Benchmark (Fast):** `./streaming_benchmark` (Disk writes are skipped).
 * **Export Vector Map:** `./streaming_benchmark --svg` (Generates a `whole.svg` file).
 
-> 📌 **Output Note:** The extraction process generates a `whole.svg` (--svg option) file inside the `build` folder containing the rendered vector output. To easily verify topological precision, outer boundaries are colored in **red** and inner holes (voids) in **green**.
+> **Output Note:** The extraction process generates a `whole.svg` (--svg option) file inside the `build` folder containing the rendered vector output. To easily verify topological precision, outer boundaries are colored in **red** and inner holes (voids) in **green**.
 
 > *Note on viewing:* Due to the massive size of the generated vector file (~217k detailed polygons), it can be opened and viewed directly in Google Chrome, though you may experience occasional, temporary application freezes (locks).
 
@@ -138,7 +138,7 @@ Other commands
 ./progressive_streaming_benchmark --image '../images/test_20480x20480.png'
 ```
 
-#### 🚀 Gigapixel Streaming Benchmark (high_complexity_81920x81920.png)
+#### Gigapixel Streaming Benchmark (high_complexity_81920x81920.png)
 
 ```text
 Input image
@@ -162,7 +162,7 @@ Output
 - SVG size:            7.22 GB
 ```
 
-> 📌 **Output Note:** Starting from version 1.34 of Contrek Library, processing times, polygon counts, and other data may vary. This is due to a fundamental restructuring of the tracking algorithm, which is now based on a 4-vertex pixel-cell topology.
+> **Output Note:** Starting from version 1.34 of Contrek Library, processing times, polygon counts, and other data may vary. This is due to a fundamental restructuring of the tracking algorithm, which is now based on a 4-vertex pixel-cell topology.
 
 #### Architecture Overview
 

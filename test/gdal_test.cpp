@@ -154,7 +154,7 @@ ProcessResult* stream_progressive_png_image(const std::string& filepath, const s
     spng_ctx_free(ctx);
     return nullptr;
   }
-  // allocates streaming svg buffer
+  // allocates streaming buffer
   std::ofstream shared_stream(geojson_filepath, std::ios::out | std::ios::binary);
   if (!shared_stream) {
     std::cerr << "Error: Unable creating output streaming file!" << std::endl;
@@ -207,7 +207,7 @@ ProcessResult* stream_progressive_png_image(const std::string& filepath, const s
       PolygonFinder polygon_finder(&stripe_bitmap, &not_matcher, nullptr, finder_options);
       ProcessResult *result = polygon_finder.process_info();
       if (result) {
-        std::cout << "stripe " << stripe_count << ": found polygons " << result->groups << std::endl;
+        //std::cout << "stripe " << stripe_count << ": found polygons " << result->groups << std::endl;
         vmerger.add_tile(*result, current_y_offset + lines_to_read >= total_height);
         delete result;
       }
@@ -215,7 +215,7 @@ ProcessResult* stream_progressive_png_image(const std::string& filepath, const s
       stripe_count++;
     }
     merged_result = vmerger.process_info();
-    std::cout << "total found polygons " << merged_result->groups << std::endl;
+    //std::cout << "total found polygons " << merged_result->groups << std::endl;
   } catch (const std::exception& e) {
     std::cerr << "\n[ERROR] Processing exception: " << e.what() << std::endl;
     if (shared_stream.is_open()) shared_stream.close();
@@ -254,83 +254,6 @@ EngineMetrics run_contrek_isolated(const std::string& path, const std::string& n
   return m;
 }
 
-/*EngineMetrics run_gdal_isolated_single_class(const std::string& path, const std::string& name) {
-  int fd[2];
-  pipe(fd);
-  if (fork() == 0) {
-    close(fd[0]);
-    EngineMetrics m{};
-
-    char** openOpts = nullptr;
-    openOpts = CSLSetNameValue(openOpts, "FORCE_COLOR_INTERP", "GRAY");
-    auto* src = (GDALDataset*)GDALOpenEx(path.c_str(), GDAL_OF_RASTER, nullptr, openOpts, nullptr);
-    CSLDestroy(openOpts);
-    auto* band = src->GetRasterBand(1);
-
-    int xsize = band->GetXSize();
-    int ysize = band->GetYSize();
-    const GByte WHITE = 255;
-
-    auto* memDriver = GetGDALDriverManager()->GetDriverByName("MEM");
-    auto* maskDS = memDriver->Create("", xsize, ysize, 1, GDT_Byte, nullptr);
-    auto* maskBand = maskDS->GetRasterBand(1);
-
-    std::vector<GByte> rowBuf(xsize);
-    std::vector<GByte> maskRow(xsize);
-    for (int y = 0; y < ysize; y++) {
-      band->RasterIO(GF_Read, 0, y, xsize, 1, rowBuf.data(), xsize, 1, GDT_Byte, 0, 0);
-      for (int x = 0; x < xsize; x++) {
-        maskRow[x] = (rowBuf[x] != WHITE) ? 1 : 0;
-      }
-      maskBand->RasterIO(GF_Write, 0, y, xsize, 1, maskRow.data(), xsize, 1, GDT_Byte, 0, 0);
-    }
-
-    double start = now_ms();  // timer
-
-    std::string geojson = "./gdal_singleclass_" + name + ".geojson";
-    std::remove(geojson.c_str());
-    auto* driver = GetGDALDriverManager()->GetDriverByName("GeoJSON");
-    auto* dst = driver->Create(geojson.c_str(), 0, 0, 0, GDT_Unknown, nullptr);
-    auto* layer = dst->CreateLayer("gdal_contours", nullptr, wkbPolygon, nullptr);
-    OGRFieldDefn field("PixelVal", OFTInteger);
-    layer->CreateField(&field);
-    int pix = layer->GetLayerDefn()->GetFieldIndex("PixelVal");
-
-    char** opts = nullptr;
-    opts = CSLSetNameValue(opts, "8CONNECTED", "8");
-
-    GDALPolygonize(band, maskBand, layer, pix, opts, nullptr, nullptr);
-
-    CSLDestroy(opts);
-    GDALClose(maskDS);
-    GDALClose(src);
-    GDALClose(dst);
-    m.time_ms = now_ms() - start;
-    m.ram_mb = get_peak_rss();
-    CPLSetConfigOption("OGR_GEOJSON_MAX_OBJ_SIZE", "0");
-    auto* readDS = (GDALDataset*)GDALOpenEx(geojson.c_str(), GDAL_OF_VECTOR, nullptr, nullptr, nullptr);
-    auto* readLayer = readDS->GetLayer(0);
-    readLayer->ResetReading();
-    while (auto* f = readLayer->GetNextFeature()) {
-      auto* poly = (OGRPolygon*)f->GetGeometryRef();
-      m.external++;
-      m.holes += poly->getNumInteriorRings();
-      OGRFeature::DestroyFeature(f);
-    }
-    GDALClose(readDS);
-
-    write(fd[1], &m, sizeof(m));
-    close(fd[1]);
-    _exit(0);
-  }
-  close(fd[1]);
-  EngineMetrics m{};
-  read(fd[0], &m, sizeof(m));
-  close(fd[0]);
-  wait(nullptr);
-  return m;
-}*/
-
 EngineMetrics run_gdal_isolated_single_class(const std::string& path, const std::string& name) {
   int fd[2];
   pipe(fd);
@@ -388,20 +311,6 @@ EngineMetrics run_gdal_isolated_single_class(const std::string& path, const std:
     m.time_ms = now_ms() - start;
     m.ram_mb = get_peak_rss();
 
-    /*CPLSetConfigOption("OGR_GEOJSON_MAX_OBJ_SIZE", "0");
-    auto* readDS = (GDALDataset*)GDALOpenEx(geojson.c_str(), GDAL_OF_VECTOR, nullptr, nullptr, nullptr);
-    if (readDS) {
-      auto* readLayer = readDS->GetLayer(0);
-      readLayer->ResetReading();
-      while (auto* f = readLayer->GetNextFeature()) {
-        auto* poly = (OGRPolygon*)f->GetGeometryRef();
-        m.external++;
-        m.holes += poly->getNumInteriorRings();
-        OGRFeature::DestroyFeature(f);
-      }
-      GDALClose(readDS);
-    }*/
-
     PolyMetrics res = count_polygons_and_holes_gdal(geojson.c_str());
     m.external = res.external;
     m.holes = res.holes;
@@ -422,186 +331,7 @@ EngineMetrics run_gdal_isolated_single_class(const std::string& path, const std:
   }
   return m;
 }
-/*
-EngineMetrics run_gdal_isolated_single_class(const std::string& path, const std::string& name) {
-  int fd[2];
-  if (pipe(fd) < 0) {
-    perror("pipe failed");
-    return {-1, -1, 0, 0};
-  }
 
-  pid_t pid = fork();
-
-  if (pid == 0) { // === PROCESSO FIGLIO ===
-    close(fd[0]);
-    
-    printf("[CHILD] Processo avviato (PID: %d)\n", getpid());
-    fflush(stdout);
-
-    EngineMetrics m{};
-    char** openOpts = nullptr;
-    openOpts = CSLSetNameValue(openOpts, "FORCE_COLOR_INTERP", "GRAY");
-
-    printf("[CHILD] 1. Apertura raster sorgente: %s\n", path.c_str());
-    fflush(stdout);
-
-    auto* src = (GDALDataset*)GDALOpenEx(path.c_str(), GDAL_OF_RASTER, nullptr, openOpts, nullptr);
-    CSLDestroy(openOpts);
-
-    if (!src) {
-      printf("[CHILD ERR] Impossibile aprire il raster sorgente!\n");
-      fflush(stdout);
-      write(fd[1], &m, sizeof(m));
-      close(fd[1]);
-      _exit(1);
-    }
-
-    auto* band = src->GetRasterBand(1);
-    int xsize = band->GetXSize();
-    int ysize = band->GetYSize();
-    printf("[CHILD] 2. Dimensioni Raster: %dx%d pixel\n", xsize, ysize);
-    fflush(stdout);
-
-    const GByte WHITE = 255;
-    auto* memDriver = GetGDALDriverManager()->GetDriverByName("MEM");
-    
-    printf("[CHILD] 3. Creazione maschera in memoria (MEM driver)...\n");
-    fflush(stdout);
-
-    auto* maskDS = memDriver->Create("", xsize, ysize, 1, GDT_Byte, nullptr);
-    if (!maskDS) {
-      printf("[CHILD ERR] Impossibile creare il Dataset in memoria per la maschera!\n");
-      fflush(stdout);
-      GDALClose(src);
-      write(fd[1], &m, sizeof(m));
-      close(fd[1]);
-      _exit(1);
-    }
-
-    auto* maskBand = maskDS->GetRasterBand(1);
-    std::vector<GByte> rowBuf(xsize);
-    std::vector<GByte> maskRow(xsize);
-
-    printf("[CHILD] 4. Inizio elaborazione riga per riga (Sogliatura)...\n");
-    fflush(stdout);
-
-    for (int y = 0; y < ysize; y++) {
-      band->RasterIO(GF_Read, 0, y, xsize, 1, rowBuf.data(), xsize, 1, GDT_Byte, 0, 0);
-      for (int x = 0; x < xsize; x++) {
-        maskRow[x] = (rowBuf[x] != WHITE) ? 1 : 0;
-      }
-      maskBand->RasterIO(GF_Write, 0, y, xsize, 1, maskRow.data(), xsize, 1, GDT_Byte, 0, 0);
-      
-      // Stampiamo uno stato ogni 5000 righe per monitorare il ciclo
-      if (y > 0 && y % 5000 == 0) {
-        printf("[CHILD] ...elaborate %d / %d righe\n", y, ysize);
-        fflush(stdout);
-      }
-    }
-
-    printf("[CHILD] 5. Sogliatura completata. Creazione file GeoJSON output...\n");
-    fflush(stdout);
-
-    double start = now_ms();
-    std::string geojson = "./gdal_singleclass_" + name + ".geojson";
-    std::remove(geojson.c_str());
-
-    auto* driver = GetGDALDriverManager()->GetDriverByName("GeoJSON");
-    auto* dst = driver->Create(geojson.c_str(), 0, 0, 0, GDT_Unknown, nullptr);
-    auto* layer = dst->CreateLayer("gdal_contours", nullptr, wkbPolygon, nullptr);
-
-    OGRFieldDefn field("PixelVal", OFTInteger);
-    layer->CreateField(&field);
-    int pix = layer->GetLayerDefn()->GetFieldIndex("PixelVal");
-
-    char** opts = nullptr;
-    opts = CSLSetNameValue(opts, "8CONNECTED", "8");
-
-    printf("[CHILD] 6. AVVIO GDALPolygonize (Punto critico 1 - Consumo RAM/CPU)...\n");
-    fflush(stdout);
-
-    GDALPolygonize(band, maskBand, layer, pix, opts, nullptr, nullptr);
-
-    printf("[CHILD] 7. GDALPolygonize COMPLETATO! Chiusura dataset vector...\n");
-    fflush(stdout);
-
-    CSLDestroy(opts);
-    GDALClose(maskDS);
-    GDALClose(src);
-    GDALClose(dst);
-
-    m.time_ms = now_ms() - start;
-    m.ram_mb = get_peak_rss();
-
-    printf("[CHILD] 8. Apertura GeoJSON generato per conteggio geometrie (Punto critico 2)...\n");
-    fflush(stdout);
-
-    CPLSetConfigOption("OGR_GEOJSON_MAX_OBJ_SIZE", "0");
-    auto* readDS = (GDALDataset*)GDALOpenEx(geojson.c_str(), GDAL_OF_VECTOR, nullptr, nullptr, nullptr);
-    
-    if (readDS) {
-      auto* readLayer = readDS->GetLayer(0);
-      readLayer->ResetReading();
-      
-      printf("[CHILD] 9. Inizio lettura feature dal GeoJSON...\n");
-      fflush(stdout);
-
-      long long featureCount = 0;
-      while (auto* f = readLayer->GetNextFeature()) {
-        auto* poly = (OGRPolygon*)f->GetGeometryRef();
-        if (poly) {
-          m.external++;
-          m.holes += poly->getNumInteriorRings();
-        }
-        OGRFeature::DestroyFeature(f);
-
-        featureCount++;
-        if (featureCount % 100000 == 0) {
-          printf("[CHILD] ...lette %lld feature dal GeoJSON\n", featureCount);
-          fflush(stdout);
-        }
-      }
-      GDALClose(readDS);
-      printf("[CHILD] 10. Lettura GeoJSON completata con successo (%lld feature totali).\n", featureCount);
-      fflush(stdout);
-    } else {
-      printf("[CHILD ERR] Impossibile riaprire il GeoJSON generato!\n");
-      fflush(stdout);
-    }
-
-    printf("[CHILD] 11. Invio risultati al padre e uscita pulita.\n");
-    fflush(stdout);
-
-    write(fd[1], &m, sizeof(m));
-    close(fd[1]);
-    _exit(0);
-  }
-
-  // === PROCESSO PADRE ===
-  close(fd[1]);
-  EngineMetrics m{};
-  read(fd[0], &m, sizeof(m));
-  close(fd[0]);
-
-  int status;
-  waitpid(pid, &status, 0);
-
-  if (WIFSIGNALED(status)) {
-    int sig = WTERMSIG(status);
-    printf("[PARENT ERR] Il processo figlio è stato ucciso dal SEGNALE: %d (%s)\n", 
-           sig, (sig == 9 ? "SIGKILL - Molto probabilmente OOM Out Of Memory" : "Crash/Altro"));
-  } else if (WIFEXITED(status) && WEXITSTATUS(status) != 0) {
-    printf("[PARENT ERR] Il processo figlio è uscito con CODICE ERRORE: %d\n", WEXITSTATUS(status));
-  }
-
-  if (WIFSIGNALED(status) || (WIFEXITED(status) && WEXITSTATUS(status) != 0)) {
-    m.time_ms = -1;
-    m.ram_mb = -1;
-  }
-
-  return m;
-}
-*/
 bool get_png_dimensions(const std::string& filepath, int& width, int& height) {
   std::ifstream file(filepath, std::ios::binary);
   if (!file) return false;

@@ -20,6 +20,8 @@ sudo docker compose build test
 sudo docker compose run test
 ```
 
+Compile the source file **gdal_test.cpp** available under the repo /test directory.
+
 ```bash
 cd test
 ./cpp_test.sh
@@ -49,3 +51,14 @@ Heavier datasets can be executed individually using the `--image` option:
 ## Benchmark results
 
 The generated HTML report is available **[HERE](https://runout77.github.io/test_contrek/cpp_geojson_benchmark_results.html)**
+
+The report includes results using images
+- test_40960x40960.png
+- test_81920x81920.png
+- high_complexity_81920x81920.png
+
+Most of them are not included in the main repo. You can download them using this script (called from root directory)
+
+```Bash
+./scripts/download_test_assets.sh
+```

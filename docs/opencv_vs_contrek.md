@@ -121,7 +121,7 @@ OPENCV_IO_MAX_IMAGE_PIXELS=2147483647 ./contrek_opencv_benchmark --image test_40
 ## Benchmark Results
 The following data was obtained on an AMD Ryzen 7 3700X 8-Core Processor (BogoMIPS: 7199.99) with 64 GB on an Ubuntu distribution.
 
-### 📊 High-Level Benchmark Results (Ruby vs Python)
+### High-Level Benchmark Results (Ruby vs Python)
 *Test environment: Ruby (Contrek) vs Python (OpenCV)*
 
 | Image Name | Resolution | Python (OpenCV) | Ruby (Contrek) | Polylines (Outer/Inner) |
@@ -139,7 +139,7 @@ The following data was obtained on an AMD Ryzen 7 3700X 8-Core Processor (BogoMI
 * Results confirm that the precision of the extracted polygons is nearly identical between the two systems.
 
 
-### 🚀 Native Benchmark Results: Contrek vs OpenCV
+### Native Benchmark Results: Contrek vs OpenCV
 *Environment: Native C++ Engine | Configuration: 8 Threads / 8 Tiles*
 
 👉 [Native Benchmarks table of results](https://runout77.github.io/test_contrek/cpp_benchmark_results.html)
@@ -155,10 +155,8 @@ The following data was obtained on an AMD Ryzen 7 3700X 8-Core Processor (BogoMI
 
 ---
 
-### 📂 Benchmark Methodology (Cold vs. Warm Runs)
+### Benchmark Methodology (Cold vs. Warm Runs)
 
 To ensure maximum accuracy, eliminate OS thread scheduling noise, and bypass transient caching effects, the benchmark is executed **11 consecutive times**.
 
-
-🌐 [Live report](https://runout77.github.io/test_contrek/multiple_runs.html)
-
+[Live report](https://runout77.github.io/test_contrek/multiple_runs.html)
