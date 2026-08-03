@@ -482,5 +482,5 @@ int main(int argc, char* argv[]) {
   html << "</tbody></table></body></html>";
   html.close();
   
-  std::cout << "\n[OK] Benchmark done! Report data to 'cpp_gdal_benchmark_results.html'" << std::endl;
+  std::cout << "\n[OK] Benchmark done! Report data to 'cpp_geojson_benchmark_results.html'" << std::endl;
 }

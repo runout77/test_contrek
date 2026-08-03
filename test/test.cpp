@@ -253,7 +253,7 @@ int main(int argc, char* argv[]) {
        << ".bad { background: #e67e22; color: white; }"
        << "</style></head><body>";
 
-  html << "<h1 style='color: #232f3e;'>🚀 Contrek vs OpenCV: Native Benchmark Report</h1>";
+  html << "<h1 style='color: #232f3e;'>Contrek vs OpenCV: Native Benchmark Report</h1>";
   html << "<p>Mode: <b>" << (use_tree ? "RETR_TREE / treemap=true" : "RETR_CCOMP / treemap=false") << "</b></p>";
   html << "<p><i>Each engine runs in an isolated child process (fork), so peak-RSS measurements are not contaminated across engines or across images.</i></p>";
   html << "<table><thead>";
