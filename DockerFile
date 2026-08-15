@@ -8,6 +8,7 @@ RUN apt-get update && apt-get install -y \
     build-essential \
     cmake \
     python3 \
+    python3-dev \
     python3-numpy \
     python3-bs4 \
     python3-lxml \
@@ -31,7 +32,7 @@ RUN apt-get update && apt-get install -y \
     unzip \
     && rm -rf /var/lib/apt/lists/*
 
-# Custom OpenCV build
+# Custom OpenCV build (supports C++ and Python bindings)
 RUN git clone --branch 4.10.0 --depth 1 https://github.com/opencv/opencv.git /tmp/opencv && \
     mkdir -p /tmp/opencv/build && \
     cd /tmp/opencv/build && \
@@ -42,7 +43,8 @@ RUN git clone --branch 4.10.0 --depth 1 https://github.com/opencv/opencv.git /tm
       -DBUILD_TESTS=OFF \
       -DBUILD_PERF_TESTS=OFF \
       -DBUILD_EXAMPLES=OFF \
-      -DBUILD_opencv_python3=OFF \
+      -DBUILD_opencv_python3=ON \
+      -DPYTHON3_EXECUTABLE=/usr/bin/python3 \
       -DWITH_TBB=ON \
       -DWITH_OPENMP=ON \
       -DCMAKE_INSTALL_PREFIX=/usr/local/opencv-custom && \
@@ -50,8 +52,10 @@ RUN git clone --branch 4.10.0 --depth 1 https://github.com/opencv/opencv.git /tm
     make install && \
     rm -rf /tmp/opencv
 
+# Environment variables C++ and Python
 ENV OpenCV_DIR=/usr/local/opencv-custom/lib/cmake/opencv4
 ENV LD_LIBRARY_PATH=/usr/local/opencv-custom/lib:/usr/local/lib:$LD_LIBRARY_PATH
+ENV PYTHONPATH=/usr/local/opencv-custom/lib/python3.12/site-packages:/usr/local/opencv-custom/lib/python3.12/dist-packages:$PYTHONPATH
 
 # zlib-ng
 RUN git clone https://github.com/zlib-ng/zlib-ng.git /tmp/zlib-ng && \
