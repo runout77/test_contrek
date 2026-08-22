@@ -3,7 +3,9 @@
 ## Contents
 
 ### Benchmarks
-- [OpenCV vs Contrek comparison](docs/opencv_vs_contrek.md)
+- [OpenCV Python vs Contrek Ruby comparison](docs/opencv_python_vs_contrek_ruby.md)
+- [OpenCV Python vs Contrek Python comparison](docs/opencv_vs_contrek_python.md)
+- [OpenCV CPP vs Contrek CPP comparison](docs/opencv_cpp_vs_contrek_cpp.md)
 - [GDALPolygonize vs Contrek Benchmark](docs/gdalpolygonize_vs_contrek.md)
 
 ### Advanced Techniques

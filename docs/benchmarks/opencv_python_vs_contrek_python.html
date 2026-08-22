@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta content="text/html; charset=utf-8" http-equiv="Content-Type"/>
+<meta charset="utf-8"/>
+<title>OpenCV vs Contrek Benchmark</title>
+<style>
+        body { font-family: sans-serif; background: #f4f4f4; padding: 20px; }
+        table { width: 100%; border-collapse: collapse; background: white; }
+        th, td { border: 1px solid #ccc; padding: 10px; text-align: center; }
+        th { background: #333; color: white; }
+        .pending { color: #999; font-style: italic; }
+        .data-cell { font-weight: bold; color: #0056b3; }
+    </style>
+</head>
+<body>
+<h2>Benchmark Results</h2>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>Datetime</th>
+<th>Image</th>
+<th>Image Size</th>
+<th>OpenCV</th>
+<th>Contrek</th>
+</tr>
+</thead>
+<tbody id="report-body"><tr count="174">
+<td>174</td>
+<td>2026-08-22 06:36</td>
+<td>test_40960x40960</td>
+<td>40960x40960</td>
+<td class="test_40960x40960" type="python">40.302105 s (polylines outer=2488, inner=514758)</td>
+<td class="test_40960x40960" type="ruby">10.760787 s (polylines outer=2488, inner=514758, threads/tiles=8/8)</td>
+</tr>
+<tr count="177">
+<td>177</td>
+<td>2026-08-22 10:03</td>
+<td>test_20480x20480</td>
+<td>20480x20480</td>
+<td class="test_20480x20480" type="python">4.777328 s (polylines outer=625, inner=128689)</td>
+<td class="test_20480x20480" type="ruby">2.620898 s (polylines outer=625, inner=128689, threads/tiles=8/8)</td>
+</tr><tr count="177">
+<td>177</td>
+<td>2026-08-22 10:03</td>
+<td>test_15360x15360</td>
+<td>15360x15360</td>
+<td class="test_15360x15360" type="python">1.173534 s (polylines outer=2447, inner=5716)</td>
+<td class="test_15360x15360" type="ruby">1.006078 s (polylines outer=2447, inner=5716, threads/tiles=8/8)</td>
+</tr><tr count="177">
+<td>177</td>
+<td>2026-08-22 10:03</td>
+<td>test_10240x10240_2</td>
+<td>10240x10240</td>
+<td class="test_10240x10240_2" type="python">0.578325 s (polylines outer=2447, inner=5716)</td>
+<td class="test_10240x10240_2" type="ruby">0.557312 s (polylines outer=2447, inner=5716, threads/tiles=8/8)</td>
+</tr><tr count="177">
+<td>177</td>
+<td>2026-08-22 10:03</td>
+<td>test_10240x10240</td>
+<td>10240x10240</td>
+<td class="test_10240x10240" type="python">0.583798 s (polylines outer=219, inner=2259)</td>
+<td class="test_10240x10240" type="ruby">0.286236 s (polylines outer=219, inner=2259, threads/tiles=8/8)</td>
+</tr><tr count="177">
+<td>177</td>
+<td>2026-08-22 10:03</td>
+<td>test_10000x10000</td>
+<td>10000x10000</td>
+<td class="test_10000x10000" type="python">0.740282 s (polylines outer=806, inner=371)</td>
+<td class="test_10000x10000" type="ruby">0.648261 s (polylines outer=806, inner=371, threads/tiles=8/8)</td>
+</tr><tr count="177">
+<td>177</td>
+<td>2026-08-22 10:03</td>
+<td>test_4096x4096</td>
+<td>4096x4096</td>
+<td class="test_4096x4096" type="python">1.498909 s (polylines outer=625, inner=128689)</td>
+<td class="test_4096x4096" type="ruby">0.825861 s (polylines outer=625, inner=128690, threads/tiles=8/8)</td>
+</tr><tr count="177">
+<td>177</td>
+<td>2026-08-22 10:03</td>
+<td>test_1024x1024</td>
+<td>1024x1024</td>
+<td class="test_1024x1024" type="python">0.025340 s (polylines outer=219, inner=2259)</td>
+<td class="test_1024x1024" type="ruby">0.036063 s (polylines outer=219, inner=2259, threads/tiles=8/8)</td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>

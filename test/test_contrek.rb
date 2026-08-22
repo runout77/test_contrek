@@ -29,20 +29,32 @@ OptionParser.new do |opts|
   opts.on("-j","--json", "Stores result as json structure") do |f|
     options[:json] = f
   end
+  opts.on("-i","--image IMAGE", "Use different image") do |f|
+    puts f.inspect
+    options[:image] = f.to_s
+  end
 end.parse!
 puts "Options = #{options.inspect}"
 images = [
-  {'image': 'test_1024x1024', 'w': 1024, 'h': 1024},
-  {'image': 'test_4096x4096', 'w': 4096, 'h': 4096},
-  {'image': 'test_10000x10000', 'w': 10000, 'h': 10000},
-  {'image': 'test_10240x10240', 'w': 10240, 'h': 10240},
-  {'image': 'test_10240x10240_2', 'w': 10240, 'h': 10240},
-  {'image': 'test_15360x15360', 'w': 15360, 'h': 15360},
-  {'image': 'test_20480x20480', 'w': 20480, 'h': 20480},
+  {'image': 'test_1024x1024.png', 'w': 1024, 'h': 1024},
+  {'image': 'test_4096x4096.png', 'w': 4096, 'h': 4096},
+  {'image': 'test_10000x10000.png', 'w': 10000, 'h': 10000},
+  {'image': 'test_10240x10240.png', 'w': 10240, 'h': 10240},
+  {'image': 'test_10240x10240_2.png', 'w': 10240, 'h': 10240},
+  {'image': 'test_15360x15360.png', 'w': 15360, 'h': 15360},
+  {'image': 'test_20480x20480.png', 'w': 20480, 'h': 20480},
 ]
 
+if options[:image]
+  images.clear
+  img = Magick::Image.ping("../images/#{options[:image]}").first
+  w = img.columns
+  h = img.rows
+  images << {'image': options[:image], 'w': w, 'h': h}
+end
+
 images.each do |image|
-  image_path = "../images/#{image[:image]}.png"
+  image_path = "../images/#{image[:image]}"
   puts "Processing #{image_path} .... "
   
   exclude_color = { r: 255, g: 255, b: 255, a: 255 }
@@ -64,7 +76,7 @@ images.each do |image|
   )
   polygons = result.polygons
   end_time = Time.now
-  puts result.metadata[:benchmarks]
+  # puts result.metadata[:benchmarks]
   image[:outer] = polygons.size
   image[:inner] = polygons.sum{|e| e[:inner].count }
   scan_ms = (end_time - start_time)
@@ -131,9 +143,8 @@ if tbody
   current_count = 0 if current_count.nil?
 
   images.each do |entry|
-    image_id = entry[:image]
+    image_id = File.basename(entry[:image], ".*")
     target_cell = doc.at_xpath("//tr[@count='#{current_count}']/td[@type='ruby' and contains(@class,'pending') and contains(@class,'#{image_id}')]")
-    
     if target_cell.nil?
       row = Nokogiri::XML::Node.new('tr', doc)
       row['count'] = current_count + 1

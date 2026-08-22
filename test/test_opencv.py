@@ -5,10 +5,24 @@ import os
 import sys
 import json
 from datetime import datetime, timezone
+from pathlib import Path
+from PIL import Image
+import argparse
 
-DRAW = "--draw" in sys.argv
-USE_TREE = "--tree" in sys.argv
-DUMP_JSON = "--json" in sys.argv
+Image.MAX_IMAGE_PIXELS = None
+
+parser = argparse.ArgumentParser(description="Test and benchmark OpenCV Python module")
+parser.add_argument("-d", "--draw", action="store_true", help="Draw found polygons into PNG images")
+parser.add_argument("-t", "--treemap", action="store_true", help="Build hierarchy map of found polygons")
+parser.add_argument("-j", "--json", action="store_true", help="Stores result as JSON structure")
+parser.add_argument("-i", "--image", help="Use different image")
+args = parser.parse_args()
+print(f"Options = {vars(args)}")
+
+DRAW = args.draw
+USE_TREE = args.treemap
+DUMP_JSON = args.json
+
 
 if USE_TREE:
     contour_mode = cv2.RETR_TREE
@@ -19,14 +33,20 @@ else:
 print(f"Running benchmark using mode: {mode_label}")
 
 images = [
-  {'image': 'test_1024x1024', 'w': 1024, 'h': 1024},
-  {'image': 'test_4096x4096', 'w': 4096, 'h': 4096},
-  {'image': 'test_10000x10000', 'w': 10000, 'h': 10000},
-  {'image': 'test_10240x10240', 'w': 10240, 'h': 10240},
-  {'image': 'test_10240x10240_2', 'w': 10240, 'h': 10240},
-  {'image': 'test_15360x15360', 'w': 15360, 'h': 15360},
-  {'image': 'test_20480x20480', 'w': 20480, 'h': 20480},
+  {'image': 'test_1024x1024.png', 'w': 1024, 'h': 1024},
+  {'image': 'test_4096x4096.png', 'w': 4096, 'h': 4096},
+  {'image': 'test_10000x10000.png', 'w': 10000, 'h': 10000},
+  {'image': 'test_10240x10240.png', 'w': 10240, 'h': 10240},
+  {'image': 'test_10240x10240_2.png', 'w': 10240, 'h': 10240},
+  {'image': 'test_15360x15360.png', 'w': 15360, 'h': 15360},
+  {'image': 'test_20480x20480.png', 'w': 20480, 'h': 20480},
 ]
+
+if args.image:
+  with Image.open(f"../images/{args.image}") as img:
+    w, h = img.size
+    images = []
+    images.append({'image': args.image, 'w': w, 'h': h})
 
 def build_contrek_treemap(contours, hierarchy):
   """
@@ -99,7 +119,7 @@ def build_contrek_treemap(contours, hierarchy):
   return treemap, opencv_to_poly
 
 for image in images:
-  image_path = f"../images/{image['image']}.png" 
+  image_path = f"../images/{image['image']}" 
   print(f"Processing {image_path} ....")
   start = time.time()
   img = cv2.imread(image_path, cv2.IMREAD_UNCHANGED)
@@ -210,7 +230,7 @@ if tbody:
     counts = [int(r['count']) for r in rows if r.has_attr('count')]
     current_count = max(counts) if counts else 0
     for entry in images:
-        image_id = entry['image']
+        image_id = Path(entry["image"]).stem
         target_cell = doc.select_one(f"tr[count='{current_count}'] td[type='python'].pending.{image_id}")
         target_row_count = current_count
         if target_cell is None:

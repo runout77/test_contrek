@@ -1,13 +1,10 @@
-# OpenCV vs Contrek Comparison
+# OpenCV Python vs Contrek Ruby Comparison
 
-The entire system is containerized via Docker and offers two testing modalities:
-
-* **High-Level:** A comparison between the Contrek Ruby extension and OpenCV Python bindings using identical image sets.
-* **Low-Level (Native):** A direct C++ comparison to measure the raw efficiency of both processing engines. (OpenCV is compiled from source, version 4.10.0 in Release with -O3 -Ofast -march=native -flto -DNDEBUG flags)
+The entire system is containerized via Docker and offers a high level comparison between the Contrek Ruby extension and OpenCV Python bindings using identical image sets.
 
 Configurations have been calibrated to ensure visually identical results: both engines extract external contours and holes with equivalent topological precision. Users can enable a visual validation flag to generate PNG images of the processed polygons, highlighting external boundaries in red and internal holes in green.
 
-> 📂 **Benchmark Sources Included:** The complete source code for all benchmark implementations—including the native C++ test runners, Ruby and Python-OpenCV scripts—is fully included in this repository for maximum transparency and reproducible results.
+> 📂 **Benchmark Sources Included:** The complete source code for all benchmark implementations—including the Ruby and Python-OpenCV scripts—is fully included in this repository for maximum transparency and reproducible results.
 
 ## Philosophy and Objectives
 
@@ -35,7 +32,7 @@ sudo docker compose run test
 Once inside the container shell, run the setup script to install Ruby dependencies:
 
 ```bash
-./build.sh
+./build_ruby_env.sh
 ```
 To ensure you are aligned with the latest core updates, it is recommended to run gem update contrek.
 ```bash
@@ -59,6 +56,14 @@ ruby test_contrek.rb --help
 
 The Python script supports the --tree option too which uses cv2.RETR_TREE in place of cv2.RETR_CCOMP (similar to the Contrek's `treemap: true` flag).
 
+### Very large dataset
+You can try massive images using the --image option (image are read from /images root directory)
+
+```bash
+OPENCV_IO_MAX_IMAGE_PIXELS=2147483647 python3 test_opencv.py --image test_40960x40960.png
+ruby test_contrek.rb --image test_40960x40960.png
+```
+
 ### Visual Validation:
 To verify the precision of the results graphically, add the --draw flag:
 
@@ -71,52 +76,6 @@ The resulting images will be saved in the **test/output** directory. This proces
 ### Treemaps compare script
 A ruby script to compare treemaps is provided: `compare_treemaps.rb`
 
-### Executing Low-Level Tests (Native C++)
-For a direct comparison between the C++ cores:
-
-```Bash
-cd test
-./cpp_test.sh
-cd build
-./contrek_opencv_benchmark
-```
-This script downloads the source code, compiles it via CMake, and launches the benchmarks. Will create an html report cpp_benchmark_results.html under build directory.
-For subsequent runs:
-
-```Bash
-cd build
-make -j
-./contrek_opencv_benchmark
-```
-Note: It is recommended to run the tests multiple times; initial runs may be slower due to library memory allocation and caching.
-
-Run the benchmark using hierarchical contour retrieval mode.
-
-| Flag | OpenCV mode | Contrek flag |
-|------|-------------|--------------|
-| *(absent)* | `cv::RETR_CCOMP` | `cfg.treemap = false` |
-| `--tree` | `cv::RETR_TREE` | `cfg.treemap = true` |
-
-**Usage:**
-```bash
-./contrek_opencv_benchmark --tree    # RETR_TREE + cfg.treemap=true
-```
-
-In `RETR_CCOMP` mode contours are organized in a two-level hierarchy (external + holes).
-In `RETR_TREE` mode the full parent-child nesting tree is reconstructed.
-
-### Very large dataset
-You can try massive images using the --image option (image are read from /images root directory)
-
-```bash
-OPENCV_IO_MAX_IMAGE_PIXELS=2147483647 ./contrek_opencv_benchmark --image test_40960x40960.png
-```
-
-### OpenCV Version and Build Infos
-
-```Bash
-./contrek_opencv_benchmark --info
-```
 
 ## Benchmark Results
 The following data was obtained on an AMD Ryzen 7 3700X 8-Core Processor (BogoMIPS: 7199.99) with 64 GB on an Ubuntu distribution.
@@ -126,6 +85,7 @@ The following data was obtained on an AMD Ryzen 7 3700X 8-Core Processor (BogoMI
 
 | Image Name | Resolution | Python (OpenCV) | Ruby (Contrek) | Polylines (Outer/Inner) |
 | :--- | :--- | :--- | :--- | :--- |
+| **test_40960x40960** | 40960x40960 | 40.302 s | 15.460 s | 2488 / 514758 |
 | **test_20480x20480** | 20480x20480 | 3.354 s | 4.383 s | 625 / 128689 |
 | **test_15360x15360** | 15360x15360 | 1.100 s | 1.596 s | 2447 / 5716 |
 | **test_10240x10240_2**| 10240x10240 | 0.542 s | 0.915 s | 2447 / 5716 |
@@ -137,26 +97,3 @@ The following data was obtained on an AMD Ryzen 7 3700X 8-Core Processor (BogoMI
 **Performance Notes:**
 * In high-density **4k** and **10k** tests, the Contrek Ruby extension outperforms OpenCV's Python bindings despite language overhead, thanks to parallel thread management (8 threads / 8 tiles).
 * Results confirm that the precision of the extracted polygons is nearly identical between the two systems.
-
-
-### Native Benchmark Results: Contrek vs OpenCV
-*Environment: Native C++ Engine | Configuration: 8 Threads / 8 Tiles*
-
-👉 [Native Benchmarks table of results](https://runout77.github.io/test_contrek/cpp_benchmark_results.html)
-
-
-### Tested Configuration
-
-- CPU: AMD Ryzen 7 3700X
-- Cores / Threads: 8 / 16
-- OS: Ubuntu
-- Contrek threads: 8
-- Contrek tiles: 8
-
----
-
-### Benchmark Methodology (Cold vs. Warm Runs)
-
-To ensure maximum accuracy, eliminate OS thread scheduling noise, and bypass transient caching effects, the benchmark is executed **11 consecutive times**.
-
-[Live report](https://runout77.github.io/test_contrek/multiple_runs.html)
