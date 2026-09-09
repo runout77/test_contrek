@@ -85,7 +85,7 @@ The following data was obtained on an AMD Ryzen 7 3700X 8-Core Processor (BogoMI
 
 | Image Name | Resolution | Python (OpenCV) | Ruby (Contrek) | Polylines (Outer/Inner) |
 | :--- | :--- | :--- | :--- | :--- |
-| **test_40960x40960** | 40960x40960 | 40.302 s | 15.460 s | 2488 / 514758 |
+| **test_40960x40960** | 40960x40960 | 40.302 s | **15.460 s** | 2488 / 514758 |
 | **test_20480x20480** | 20480x20480 | 3.354 s | 4.383 s | 625 / 128689 |
 | **test_15360x15360** | 15360x15360 | 1.100 s | 1.596 s | 2447 / 5716 |
 | **test_10240x10240_2**| 10240x10240 | 0.542 s | 0.915 s | 2447 / 5716 |

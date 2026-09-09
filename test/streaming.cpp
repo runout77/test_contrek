@@ -9,7 +9,8 @@
 #include <filesystem>
 #include "ContrekApi.h"
 #include "polygon/finder/concurrent/VerticalMerger.h"
-
+#include "polygon/bitmaps/streaming/PngSource.h"
+#include "polygon/bitmaps/streaming/RasterStreamer.h"
 
 double get_peak_rss() {
   struct rusage r_usage;
@@ -29,67 +30,27 @@ double now_ms() {
 
 void stream_png_image(const std::string& filepath, uint32_t stripe_height, bool generate_svg, bool generate_png) {
     std::vector<ProcessResult*> result_clones;
-    Options varguments = {};
-    VerticalMerger vmerger(0, varguments);
+    Options options = {};
+    VerticalMerger vmerger(0, options);
 
     // opens image to stream
-    FILE* fp = fopen(filepath.c_str(), "rb");
-    if (!fp) {
-      std::cerr << "Unable open file: " << filepath << std::endl;
-      return;
-    }
-
-    // exams image
-    spng_ctx *ctx = spng_ctx_new(0);
-    spng_set_png_file(ctx, fp);
-    struct spng_ihdr ihdr;
-    if (spng_get_ihdr(ctx, &ihdr)) {
-      fclose(fp);
-      spng_ctx_free(ctx);
-      return;
-    }
-    uint32_t total_width = ihdr.width;
-    uint32_t total_height = ihdr.height;
+    PngSource source(filepath);
+    RasterStreamer streamer(source, stripe_height);
 
     // allocates stripe buffer
-    RawBitmap stripe_bitmap;
-    stripe_bitmap.define(total_width, stripe_height, 4, true);
+    RawBitmap stripe_bitmap(source.width(), stripe_height);
     RGBNotMatcher not_matcher(-1);
 
-    if (spng_decode_image(ctx, NULL, 0, SPNG_FMT_RGBA8, SPNG_DECODE_PROGRESSIVE)) {
-      fclose(fp);
-      spng_ctx_free(ctx);
-      return;
-    }
-
-    size_t row_size = static_cast<size_t>(total_width) * 4;
     int stripe_count = 0;
-    // main strpes loop
-    for (uint32_t current_y_offset = 0; current_y_offset < total_height; current_y_offset += stripe_height) {
-      int uncovered_height = total_height - current_y_offset;
 
-      // copy previous last line to the next new one (each contigue stripe must share one pixel scanline)
-      if (current_y_offset > 0) {
-        unsigned char* last_row_prev = const_cast<unsigned char*>(stripe_bitmap.get_row_ptr(stripe_height - 1));
-        unsigned char* first_row_curr = const_cast<unsigned char*>(stripe_bitmap.get_row_ptr(0));
-        std::memcpy(first_row_curr, last_row_prev, row_size);
-      }
-      // clears the part of the stripe wont be overwritten by png data
-      if (uncovered_height < stripe_height)
-      { stripe_bitmap.draw_filled_rectangle(0, 1, total_width, stripe_height - 1, 255, 255, 255);
-      }
-      // decoding data directly in the stripe buffer
-      uint32_t lines_to_read = std::min(stripe_height, total_height - current_y_offset);
-      for (uint32_t y = (current_y_offset == 0 ? 0 : 1); y < lines_to_read; y++) {
-        unsigned char* row_ptr = const_cast<unsigned char*>(stripe_bitmap.get_row_ptr(y));
-        int ret = spng_decode_row(ctx, row_ptr, row_size);
-        if (ret != 0 && ret != SPNG_EOI) break;
-      }
+    // main stripes loop
+    streamer.each(stripe_bitmap, [&](Bitmap& bitmap, uint32_t buffer_rows, std::size_t, std::size_t) {
       // stripe contour tracing
       Options finder_options = {
+        {"processing_height", static_cast<int64_t>(buffer_rows)},
         {"versus", Identifier{"a"}},
       };
-      PolygonFinder polygon_finder(&stripe_bitmap, &not_matcher, nullptr, finder_options);
+      PolygonFinder polygon_finder(&bitmap, &not_matcher, nullptr, finder_options);
       ProcessResult *result = polygon_finder.process_info();
       if (result) {
         std::cout << "stripe " << stripe_count << ": found polygons " << result->groups << std::endl;
@@ -97,7 +58,7 @@ void stream_png_image(const std::string& filepath, uint32_t stripe_height, bool 
         vmerger.add_tile(*result);
       }
       stripe_count++;
-    }
+    });
 
     std::cout << "Merging polygons ..." << std::endl;
     ProcessResult *merged_result = vmerger.process_info();
@@ -106,8 +67,7 @@ void stream_png_image(const std::string& filepath, uint32_t stripe_height, bool 
       std::cout << "Found total polygons: " << merged_result->groups << std::endl;
       //merged_result->print_info();
       if (generate_png) {
-        RawBitmap full_bitmap;
-        full_bitmap.define(total_width, total_height, 4, true);
+        RawBitmap full_bitmap(source.width(), source.height());
         full_bitmap.fill(255, 255, 255);
         merged_result->draw_on_bitmap(full_bitmap);
         std::cout << "Saving whole png ..." << std::endl;
@@ -121,12 +81,11 @@ void stream_png_image(const std::string& filepath, uint32_t stripe_height, bool 
       }
     }
     delete merged_result;
+
     // frees memory
     for (auto c : result_clones) {
       delete c;
     }
-    spng_ctx_free(ctx);
-    fclose(fp);
 }
 
 int main(int argc, char* argv[]) {

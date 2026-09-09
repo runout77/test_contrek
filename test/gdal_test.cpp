@@ -21,6 +21,8 @@
 #include "polygon/finder/concurrent/StreamingMerger.h"
 #include "polygon/finder/concurrent/SvgStreamingMerger.h"
 #include "polygon/finder/concurrent/GeoJsonStreamingMerger.h"
+#include "polygon/bitmaps/streaming/PngSource.h"
+#include "polygon/bitmaps/streaming/RasterStreamer.h"
 
 struct ImageInfo {
   std::string name;
@@ -117,112 +119,77 @@ PolyMetrics count_polygons_and_holes_gdal(const std::string& geojson_path) {
 
 ProcessResult* stream_progressive_png_image(const std::string& filepath, const std::string& geojson_filepath, uint32_t stripe_height) {
   ProcessResult* merged_result = nullptr;
+
   Options varguments = {
     {"compress", Options{
       {"linear", true},
     }},
   };
-  // opens image to stream
-  FILE* fp = fopen(filepath.c_str(), "rb");
-  if (!fp) {
-    std::cerr << "Unable open file: " << filepath << std::endl;
-    return nullptr;
-  }
-  // exams image
-  spng_ctx *ctx = spng_ctx_new(0);
-  spng_set_png_file(ctx, fp);
-  struct spng_ihdr ihdr;
-  if (spng_get_ihdr(ctx, &ihdr)) {
-    fclose(fp);
-    spng_ctx_free(ctx);
-    return nullptr;
-  }
-  uint32_t total_width = ihdr.width;
-  uint32_t total_height = ihdr.height;
-  if (stripe_height >= total_height) {
-    spng_ctx_free(ctx);
-    fclose(fp);
+
+  PngSource source(filepath);
+
+  if (stripe_height >= source.height()) {
     throw std::invalid_argument("stripe_height must be smaller than image height");
   }
+
+  RasterStreamer streamer(source, stripe_height);
+
   // allocates stripe buffer
-  uint32_t stripe_bitmap_height = std::min(stripe_height, total_height);
-  RawBitmap stripe_bitmap;
-  stripe_bitmap.define(total_width, stripe_bitmap_height, 4, true);
+  RawBitmap stripe_bitmap(source.width(), stripe_height);
   RGBNotMatcher not_matcher(-1);
-  if (spng_decode_image(ctx, NULL, 0, SPNG_FMT_RGBA8, SPNG_DECODE_PROGRESSIVE)) {
-    fclose(fp);
-    spng_ctx_free(ctx);
-    return nullptr;
-  }
+
   // allocates streaming buffer
   std::ofstream shared_stream(geojson_filepath, std::ios::out | std::ios::binary);
   if (!shared_stream) {
     std::cerr << "Error: Unable creating output streaming file!" << std::endl;
+    return nullptr;
   }
+
   std::vector<char> buffer(4 * 1024 * 1024);  // Buffer (4MB)
   shared_stream.rdbuf()->pubsetbuf(buffer.data(), buffer.size());
 
-  GeoJsonStreamingMerger vmerger(0, varguments, &shared_stream,0);
+  GeoJsonStreamingMerger vmerger(0, varguments, &shared_stream, 0);
+
   try {
-    size_t row_size = static_cast<size_t>(total_width) * 4;
+    uint32_t processed_rows = 0;
+    bool first = true;
     int stripe_count = 0;
-    uint32_t current_y_offset = 0;
+
     // main stripes loop
-    while (current_y_offset < total_height) {
-      uint32_t first_line = current_y_offset == 0 ? 0 : 1;
-      uint32_t lines_to_read = std::min(
-        stripe_height - first_line,
-        total_height - current_y_offset
-      );
-      uint32_t current_stripe_height = first_line + lines_to_read;
-      std::vector<unsigned char> overlap_row;
-      if (current_y_offset > 0) {
-        overlap_row.resize(row_size);
-        const unsigned char* last_row_prev =
-          stripe_bitmap.get_row_ptr(stripe_bitmap_height - 1);
-        std::memcpy(overlap_row.data(), last_row_prev, row_size);
-      }
-      if (current_stripe_height != stripe_bitmap_height) {
-        stripe_bitmap.define(total_width, current_stripe_height, 4, true);
-        stripe_bitmap_height = current_stripe_height;
-      }
-      // copy previous last line to the next new one (each contigue stripe must share one pixel scanline)
-      if (current_y_offset > 0) {
-        unsigned char* first_row_curr =
-          const_cast<unsigned char*>(stripe_bitmap.get_row_ptr(0));
-        std::memcpy(first_row_curr, overlap_row.data(), row_size);
-      }
-      // decoding data directly in the stripe buffer
-      for (uint32_t y = first_line; y < first_line + lines_to_read; y++) {
-        unsigned char* row_ptr = const_cast<unsigned char*>(stripe_bitmap.get_row_ptr(y));
-        int ret = spng_decode_row(ctx, row_ptr, row_size);
-        if (ret != 0 && ret != SPNG_EOI) break;
-      }
+    streamer.each(stripe_bitmap, [&](Bitmap& bitmap, uint32_t buffer_rows, std::size_t, std::size_t) {
       // stripe contour tracing
       Options finder_options = {
+        {"processing_height", static_cast<int>(buffer_rows)},
         {"versus", Identifier{"a"}},
         {"bounds", true},
         {"connectivity", 8}
       };
-      PolygonFinder polygon_finder(&stripe_bitmap, &not_matcher, nullptr, finder_options);
+
+      PolygonFinder polygon_finder(&bitmap, &not_matcher, nullptr, finder_options);
       ProcessResult *result = polygon_finder.process_info();
+
       if (result) {
-        //std::cout << "stripe " << stripe_count << ": found polygons " << result->groups << std::endl;
-        vmerger.add_tile(*result, current_y_offset + lines_to_read >= total_height);
+        std::cout << "stripe " << stripe_count << ": found polygons " << result->groups << std::endl;
+
+        processed_rows += buffer_rows - (first ? 0 : RasterStreamer::OVERLAP);
+        vmerger.add_tile(*result, processed_rows == source.height());
+
         delete result;
       }
-      current_y_offset += lines_to_read;
+
       stripe_count++;
-    }
+      first = false;
+    });
+
     merged_result = vmerger.process_info();
-    //std::cout << "total found polygons " << merged_result->groups << std::endl;
+    std::cout << "total found polygons " << merged_result->groups << std::endl;
+
   } catch (const std::exception& e) {
     std::cerr << "\n[ERROR] Processing exception: " << e.what() << std::endl;
     if (shared_stream.is_open()) shared_stream.close();
   }
-  spng_ctx_free(ctx);
-  fclose(fp);
-  return(merged_result);
+
+  return merged_result;
 }
 
 EngineMetrics run_contrek_isolated(const std::string& path, const std::string& name) {
