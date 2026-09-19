@@ -9,5 +9,5 @@
 - [GDALPolygonize vs Contrek Benchmark](docs/gdalpolygonize_vs_contrek.md)
 
 ### Advanced Techniques
+- [OpenCV Made Multithread with Contrek](docs/opencv_made_multithread.md)
 - [Advanced Techniques & Demonstration Tools](docs/advanced_techniques.md)
-

@@ -6,6 +6,9 @@ Configurations have been calibrated to ensure visually identical results: both e
 
 > 📂 **Benchmark Sources Included:** The complete source code for all benchmark implementations—including the native C++ test runners are included in this repository for maximum transparency and reproducible results.
 
+> **Note:** Contrek uses multiple threads while OpenCV `findContours` is single-threaded. This is intentional: the goal of this benchmark is to compare the maximum performance each engine can achieve on the same hardware, not their single-thread performance.
+
+
 ### Build and Launch via Docker
 The entire environment is fully containerized to ensure cross-platform compatibility and reproducible results. Build the system and launch the interactive testing shell using:
 

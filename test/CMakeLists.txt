@@ -39,12 +39,12 @@ endif()
 # TARGETS
 # =================================================================
 
-# 1. Target Original
+# Target Original
 add_executable(contrek_opencv_benchmark test.cpp)
 target_include_directories(contrek_opencv_benchmark PRIVATE ${OpenCV_INCLUDE_DIRS})
 target_link_libraries(contrek_opencv_benchmark PRIVATE ${COMMON_LIBS})
 
-# 2. Target Streaming
+# Target Streaming
 add_executable(streaming_benchmark streaming.cpp)
 target_include_directories(streaming_benchmark PRIVATE 
     ${OpenCV_INCLUDE_DIRS}
@@ -52,7 +52,7 @@ target_include_directories(streaming_benchmark PRIVATE
 )
 target_link_libraries(streaming_benchmark PRIVATE ${COMMON_LIBS})
 
-# 3. Target Progressive Streaming
+# Target Progressive Streaming
 add_executable(progressive_streaming_benchmark progressive_streaming.cpp)
 target_include_directories(progressive_streaming_benchmark PRIVATE 
     ${OpenCV_INCLUDE_DIRS}
@@ -60,8 +60,13 @@ target_include_directories(progressive_streaming_benchmark PRIVATE
 )
 target_link_libraries(progressive_streaming_benchmark PRIVATE ${COMMON_LIBS})
 
+# Target OpenCV Multithread
+add_executable(test_opencv_multithread test_opencv_multithread.cpp)
+target_include_directories(test_opencv_multithread PRIVATE ${OpenCV_INCLUDE_DIRS})
+target_link_libraries(test_opencv_multithread PRIVATE ${COMMON_LIBS})
+
 # =================================================================
-# 4. GDAL Test
+# GDAL Test
 # =================================================================
 find_package(GDAL REQUIRED)
 if(GDAL_FOUND)
