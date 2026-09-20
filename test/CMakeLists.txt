@@ -65,6 +65,11 @@ add_executable(test_opencv_multithread test_opencv_multithread.cpp)
 target_include_directories(test_opencv_multithread PRIVATE ${OpenCV_INCLUDE_DIRS})
 target_link_libraries(test_opencv_multithread PRIVATE ${COMMON_LIBS})
 
+# Target OpenCV Multithread Streaming
+add_executable(test_opencv_multithread_streaming test_opencv_multithread_streaming.cpp)
+target_include_directories(test_opencv_multithread_streaming PRIVATE ${OpenCV_INCLUDE_DIRS})
+target_link_libraries(test_opencv_multithread_streaming PRIVATE ${COMMON_LIBS})
+
 # =================================================================
 # GDAL Test
 # =================================================================
