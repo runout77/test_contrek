@@ -31,6 +31,7 @@ RUN apt-get update && apt-get install -y \
     libeigen3-dev \
     libgdal-dev \
     wget \
+    curl \
     unzip \
     && rm -rf /var/lib/apt/lists/*
 
