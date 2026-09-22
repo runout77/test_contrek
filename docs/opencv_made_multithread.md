@@ -1,12 +1,15 @@
 # OpenCV Made Multithread with Contrek
 
-This example demonstrates how to make OpenCV contour extraction work in
+This C++ example demonstrates how to make OpenCV contour extraction work in
 parallel by processing independent image stripes and recomposing the resulting
 geometry with Contrek.
 
 OpenCV `findContours()` is applied independently to multiple stripes, which
-can be processed concurrently by different CPU threads. Contrek then converts the partial contours to its cell-boundary representation
-and merges them into the geometry of the complete image.
+can be processed concurrently by different CPU threads. Contrek then converts
+the partial contours to its cell-boundary representation and merges them into
+the geometry of the complete image. **Contours crossing stripe boundaries are
+reconnected by Contrek during the merge, reconstructing the geometry of the
+complete image.**
 
 To make independent OpenCV stripes mergeable, contour coordinates must be
 converted to cell-boundary coordinates, as required by Contrek's merging
@@ -48,9 +51,11 @@ Bigger image test:
 ```Bash
 ./test_opencv_multithread --stripe-height 1000 --image test_40960x40960.png --threads 8
 ```
+
+
 ## Performance
 
-The following results were measured on the same 40960 × 40960 test image.
+The following results were measured on the same 40960 × 40960 test image. All execution times were measured using the C++ executables.
 
 | Method | Threads | Stripe Height | Execution Time | Peak Memory |
 |---|---:|---:|---:|---:|
