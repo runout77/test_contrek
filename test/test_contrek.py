@@ -13,7 +13,7 @@ import contrek
 
 Image.MAX_IMAGE_PIXELS = None
 
-# 1. Configurazione argomenti da linea di comando
+# input arguments
 parser = argparse.ArgumentParser(description="Test and benchmark Contrek Python module")
 parser.add_argument("-d", "--draw", action="store_true", help="Draw found polygons into PNG images")
 parser.add_argument("-t", "--treemap", action="store_true", help="Build hierarchy map of found polygons")
@@ -44,7 +44,7 @@ if args.image:
 
 exclude_color = {"r": 255, "g": 255, "b": 255, "a": 255}
 
-# 2. Elaborazione delle immagini tramite contrek-python
+# contrek-python image processing
 for image in images:
     image_path = f"../images/{image['image']}"
     print(f"Processing {image_path} ....")
@@ -85,19 +85,19 @@ for image in images:
     if "benchmarks" in metadata:
         print(f"  Benchmarks: {metadata['benchmarks']}")
 
-    # 3. Disegno dell'immagine (se specificato -d / --draw)
+    # image result draw (if -d / --draw)
     if args.draw:
         os.makedirs("output", exist_ok=True)
         canvas = np.full((image['h'], image['w'], 3), 255, dtype=np.uint8)
 
         for poly in polygons:
-            # Punti esterni (Rosso)
+            # outer points (red)
             outer_flat = poly.get('outer', [])
             if len(outer_flat) > 0:
                 pts_outer = np.array(outer_flat, dtype=np.int32).reshape((-1, 1, 2))
                 cv2.polylines(canvas, [pts_outer], isClosed=True, color=(0, 0, 255), thickness=1)
 
-            # Punti interni/fori (Verde)
+            # inner points (green)
             for inner_flat in poly.get('inner', []):
                 if len(inner_flat) >= 4:
                     pts_inner = np.array(inner_flat, dtype=np.int32).reshape((-1, 1, 2))
@@ -105,7 +105,7 @@ for image in images:
 
         cv2.imwrite(f"output/{image['image']}_contrek.png", canvas)
 
-    # 4. Dump JSON del risultato (se specificato -j / --json)
+    # result json dump (if -j / --json)
     if args.json:
         os.makedirs("output", exist_ok=True)
         output_data = []
@@ -114,7 +114,7 @@ for image in images:
         for i, polygon in enumerate(polygons):
             outer_pts = polygon.get('outer', [])
             
-            # Converte in array NumPy e ridimensiona a coppie (N, 2)
+            # NumPy conversion
             if len(outer_pts) >= 2:
                 pts_array = np.array(outer_pts, dtype=np.int32).reshape(-1, 2)
                 outer_formatted = [{"x": int(pt[0]), "y": int(pt[1])} for pt in pts_array]
@@ -139,7 +139,7 @@ for image in images:
         with open(json_path, "w", encoding="utf-8") as f:
             json.dump(output_data, f, indent=2)
 
-# 5. Aggiornamento Report HTML (scrive nelle celle type="ruby" destinate al secondo concorrente)
+# html report update
 file_path = "report.html"
 file_ori_path = "report_ori.html"
 now_utc = datetime.datetime.now(datetime.timezone.utc)
@@ -164,7 +164,6 @@ if tbody:
 
     for entry in images:
         image_id = Path(entry["image"]).stem
-        # Cerca la riga pendente per le celle type="ruby" (contrek-python)
         target_cell = doc.select_one(f"tr[count='{current_count}'] td[type='ruby'].pending.{image_id}")
         target_row_count = current_count
 
