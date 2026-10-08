@@ -11,3 +11,4 @@
 - [OpenCV Python vs Contrek Python comparison](docs/opencv_vs_contrek_python.md)
 - [OpenCV CPP vs Contrek CPP comparison](docs/opencv_cpp_vs_contrek_cpp.md)
 - [GDALPolygonize vs Contrek Benchmark](docs/gdalpolygonize_vs_contrek.md)
+- [Python Concurrent Progressive Streaming Benchmark](docs/python_streaming.md)
