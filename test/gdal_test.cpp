@@ -121,6 +121,7 @@ ProcessResult* stream_progressive_png_image(const std::string& filepath, const s
   ProcessResult* merged_result = nullptr;
 
   Options varguments = {
+    {"unsafe_mode", true},
     {"compress", Options{
       {"linear", true},
     }},

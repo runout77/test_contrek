@@ -49,6 +49,7 @@ void stream_progressive_png_image(const std::string& filepath, uint32_t stripe_h
   shared_stream.rdbuf()->pubsetbuf(buffer.data(), buffer.size());
 
   Options varguments = {
+    {"unsafe_mode", true},
     {"bounds", true}
   };
 

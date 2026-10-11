@@ -96,7 +96,7 @@ def run(args):
         return stripe, rows_read, tile
 
     merger = contrek.SvgStreamingMerger(
-        {"bounds": True},
+        {"bounds": True, "unsafe_mode": True},
         str(output_path),
         source.width,
         source.height,

@@ -30,7 +30,7 @@ double now_ms() {
 
 void stream_png_image(const std::string& filepath, uint32_t stripe_height, bool generate_svg, bool generate_png) {
     std::vector<ProcessResult*> result_clones;
-    Options options = {};
+    Options options = {{"unsafe_mode", true}};
     VerticalMerger vmerger(0, options);
 
     // opens image to stream

@@ -133,7 +133,7 @@ void stream_png_image(const std::string& filepath, uint32_t stripe_height, int m
   RasterStreamer streamer(source, stripe_height);
 
   Options options = {
-    //{"unsafe_mode", true}
+    {"unsafe_mode", true}
   };
 
   VerticalMerger vmerger(0, options);

@@ -122,6 +122,7 @@ void stream_png_image(const std::string& filepath, uint32_t stripe_height, int m
   shared_stream.rdbuf()->pubsetbuf(output_buffer.data(), output_buffer.size());
 
   Options options = {
+    {"unsafe_mode", true},
     {"bounds", true}
   };
 

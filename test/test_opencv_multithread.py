@@ -28,7 +28,7 @@ print("threads:", number_of_threads)
 source = contrek.PngSource(image_path)
 streamer = contrek.RasterStreamer(source, stripe_height)
 bitmap = contrek.RawBitmap(source.width, stripe_height)
-merger = contrek.VerticalMerger()
+merger = contrek.VerticalMerger(options={"unsafe_mode": True})
 
 pending = deque()
 stripe_index = 0
