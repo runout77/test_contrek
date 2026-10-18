@@ -83,6 +83,7 @@ This script will download several very large images into the images/ directory.
 Then, run the benchmark:
 ```Bash
 ./streaming_benchmark --image test_81920x81920.png
+./streaming_benchmark --image '../../images/test_20480x20480.png'
 ./streaming_benchmark --help # for more options
 ```
 
@@ -135,7 +136,7 @@ Other commands
 ```Bash
 ./progressive_streaming_benchmark --help # for more options
 ./progressive_streaming_benchmark --image '../../images/test_81920x81920.png'
-./progressive_streaming_benchmark --image '../images/test_20480x20480.png'
+./progressive_streaming_benchmark --image '../../images/test_20480x20480.png'
 ```
 
 #### Gigapixel Streaming Benchmark (high_complexity_81920x81920.png)

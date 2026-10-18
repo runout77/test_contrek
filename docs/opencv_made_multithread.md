@@ -61,6 +61,7 @@ The following results were measured on the same 40960 × 40960 test image. All e
 |---|---:|---:|---:|---:|
 | OpenCV (full image) | 1 | - | 44.33 s | 9.15 GB |
 | Contrek (8 tiles) | 8 | about 5120 | 10.05 s | 12.25 GB |
+| OpenCV + Contrek | 1 | 2000 | **31.61 s** | **2.78 GB** |
 | OpenCV + Contrek | 8 | 2000 | **11.26 s** | **4.93 GB** |
 | OpenCV + Contrek | 8 | 1000 | **10.98 s** | **3.42 GB** |
 | OpenCV + Contrek | 8 | 500 | **11.51 s** | **2.87 GB** |
