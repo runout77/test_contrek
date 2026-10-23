@@ -33,6 +33,7 @@ RUN apt-get update && apt-get install -y \
     wget \
     curl \
     unzip \
+    time \
     && rm -rf /var/lib/apt/lists/*
 
 # Custom OpenCV build (supports C++ and Python bindings)

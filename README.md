@@ -3,6 +3,7 @@
 ## Contents
 
 ### Advanced Techniques
+- [Contrek C++ on Raspberry Pi 5 - Progressive Streaming Benchmark](docs/raspberrypi5_test.md)
 - [OpenCV Made Multithread with Contrek](docs/opencv_made_multithread.md)
 - [Advanced Techniques & Demonstration Tools](docs/advanced_techniques.md)
 
