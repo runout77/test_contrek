@@ -64,7 +64,7 @@ The image contains millions of polygons. You can see here a 2,000 × 2,000 pixel
 The crop can be reproduced using libvips:
 
 ```bash
-vips extract_area ../../images/output_100k.png clip_2000.png 43700 28600 2000 2000
+vips extract_area ../../images/test_100k.png clip_2000.png 43700 28600 2000 2000
 ```
 
 The extraction starts at coordinates `(43700, 28600)` and produces a 2,000 × 2,000 pixel image without decoding the entire raster into memory.
