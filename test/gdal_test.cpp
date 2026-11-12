@@ -149,7 +149,7 @@ ProcessResult* stream_progressive_png_image(const std::string& filepath, const s
   std::vector<char> buffer(4 * 1024 * 1024);  // Buffer (4MB)
   shared_stream.rdbuf()->pubsetbuf(buffer.data(), buffer.size());
 
-  GeoJsonStreamingMerger vmerger(0, varguments, &shared_stream, 0);
+  GeoJsonStreamingMerger vmerger(0, varguments, &shared_stream);
 
   try {
     uint32_t processed_rows = 0;

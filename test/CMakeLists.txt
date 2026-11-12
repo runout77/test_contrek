@@ -74,18 +74,34 @@ target_link_libraries(test_opencv_multithread_streaming PRIVATE ${COMMON_LIBS})
 # GDAL Test
 # =================================================================
 find_package(GDAL REQUIRED)
+find_package(TIFF REQUIRED)
+find_library(GEOTIFF_LIBRARY NAMES geotiff REQUIRED)
 if(GDAL_FOUND)
     message(STATUS "GDAL found: ${GDAL_VERSION}")
 else()
     message(FATAL_ERROR "GDAL not found")
 endif()
 add_executable(gdal_test gdal_test.cpp)
-target_include_directories(gdal_test PRIVATE 
+target_include_directories(gdal_test PRIVATE
     ${OpenCV_INCLUDE_DIRS}
     ${GDAL_INCLUDE_DIRS}
     ${CMAKE_CURRENT_SOURCE_DIR}/contrek_core
 )
-target_link_libraries(gdal_test PRIVATE 
+target_link_libraries(gdal_test PRIVATE
     ${COMMON_LIBS}
     ${GDAL_LIBRARIES}
+    TIFF::TIFF
+    ${GEOTIFF_LIBRARY}
+)
+add_executable(gdal_test_multiclass gdal_test_multiclass.cpp)
+target_include_directories(gdal_test_multiclass PRIVATE
+    ${OpenCV_INCLUDE_DIRS}
+    ${GDAL_INCLUDE_DIRS}
+    ${CMAKE_CURRENT_SOURCE_DIR}/contrek_core
+)
+target_link_libraries(gdal_test_multiclass PRIVATE
+    ${COMMON_LIBS}
+    ${GDAL_LIBRARIES}
+    TIFF::TIFF
+    ${GEOTIFF_LIBRARY}
 )

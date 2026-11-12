@@ -30,6 +30,7 @@ RUN apt-get update && apt-get install -y \
     libtbb-dev \
     libeigen3-dev \
     libgdal-dev \
+    gdal-bin \
     wget \
     curl \
     unzip \
