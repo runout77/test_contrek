@@ -10,7 +10,7 @@ Contrek uses a stripe-based, progressive contour extraction and merging pipeline
 - **Input:** single-band, byte-valued, classified GeoTIFFs (including palette-indexed rasters).
 - **Classes:** all pixel values, rather than a single selected class.
 - **Connectivity:** 8-connected in both implementations (`8CONNECTED=8` for GDAL).
-- **GDAL version:** 3.8.4.
+- **GDAL version:** 3.11.4
 - **Contrek version:** 1.4.8
 - **Contrek:** `multiclass: true`, stripe height **200 pixels**; adjacent stripes share the required boundary row.
 - **Output:** GeoJSON polygons with class values and holes.

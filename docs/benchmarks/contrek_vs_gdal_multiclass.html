@@ -1,7 +1,8 @@
-<!doctype html>
+<!DOCTYPE html>
+
 <html lang="en">
 <head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta charset="utf-8"/><meta content="width=device-width,initial-scale=1" name="viewport"/>
 <title>Contrek vs GDAL — Multiclass Benchmarks</title>
 <style>
 :root{color-scheme:light;--ink:#182334;--muted:#5a6676;--line:#dce3eb;--bg:#f5f7fa;--blue:#e8f1ff;--green:#e9f7ef}
@@ -14,18 +15,10 @@ thead th.gd, tbody td:nth-child(n+8):nth-child(-n+11){background:var(--gdal-cell
 </head>
 <body><main>
 <h1>Contrek vs GDAL</h1>
-<p class="sub">Multiclass raster polygonization — native benchmark results</p>
+<p class="sub">Multiclass raster polygonization — GDAL 3.11.4</p>
 <div class="table-wrap"><table>
 <thead>
-<tr><th rowspan="2" scope="col">Target image</th><th rowspan="2" scope="col">Dimensions (px)</th><th rowspan="2" scope="col">Gpx</th><th colspan="4" scope="colgroup" class="ct">Contrek</th><th colspan="4" scope="colgroup" class="gd">GDALPolygonize</th><th colspan="2" scope="colgroup">Contrek performance vs GDAL</th></tr>
+<tr><th rowspan="2" scope="col">Target image</th><th rowspan="2" scope="col">Dimensions (px)</th><th rowspan="2" scope="col">Gpx</th><th class="ct" colspan="4" scope="colgroup">Contrek</th><th class="gd" colspan="4" scope="colgroup">GDALPolygonize</th><th colspan="2" scope="colgroup">Contrek performance vs GDAL</th></tr>
 <tr><th class="ct">Exteriors</th><th class="ct">Holes</th><th class="ct">Time</th><th class="ct">Peak RAM</th><th class="gd">Exteriors</th><th class="gd">Holes</th><th class="gd">Time</th><th class="gd">Peak RAM</th><th>Faster by</th><th>Less RAM used</th></tr>
-</thead><tbody>
-<tr><td>ESA WorldCover Italy</td><td>36,000 × 36,000</td><td>1.30</td><td>3,075,841 *</td><td>1,884,009 *</td><td>63.6 s</td><td>781 MB</td><td>3,075,836 *</td><td>1,884,003 *</td><td>15m 19.5s</td><td>9,600 MB</td><td class="win">14.47×</td><td class="win">91.9% less</td></tr>
-<tr><td>ESA WorldCover Amazon</td><td>36,000 × 36,000</td><td>1.30</td><td>351,857</td><td>286,500</td><td>13.9 s</td><td>309 MB</td><td>351,857</td><td>286,500</td><td>1m 23.3s</td><td>2,216 MB</td><td class="win">6.01×</td><td class="win">86.1% less</td></tr>
-<tr><td>NOAA CONUS Quarter</td><td>77,475 × 48,735</td><td>3.78</td><td>9,657,514 *</td><td>2,721,090 *</td><td>1m 19.4s</td><td>689 MB</td><td>9,657,488 *</td><td>2,721,047 *</td><td>9m 03.2s</td><td>2,279 MB</td><td class="win">6.85×</td><td class="win">69.8% less</td></tr>
-<tr><td><strong>NOAA CONUS Full</strong></td><td>154,951 × 97,470</td><td><strong>15.10</strong></td><td>76,742,508</td><td>26,814,626</td><td>10m 42.8s</td><td>4,212 MB</td><td>76,742,508</td><td>26,814,626</td><td>72m 04.8s</td><td>8,915 MB</td><td class="win">6.73×</td><td class="win">52.8% less</td></tr>
-</tbody></table></div>
+</thead><tbody><tr><td>ESA WorldCover Italy</td><td>36,000 × 36,000</td><td>1.30</td><td>3,075,836</td><td>1,884,003</td><td>47.9 s</td><td>836 MB</td><td>3,075,836</td><td>1,884,003</td><td>3m 57.8s</td><td>9,477 MB</td><td class="win">4.96×</td><td class="win">91.2% less</td></tr><tr><td>ESA WorldCover Amazon</td><td>36,000 × 36,000</td><td>1.30</td><td>351,857</td><td>286,500</td><td>11.6 s</td><td>306 MB</td><td>351,857</td><td>286,500</td><td>53.4 s</td><td>2,216 MB</td><td class="win">4.59×</td><td class="win">86.2% less</td></tr><tr><td><strong>NOAA CONUS Full</strong></td><td>154,951 × 97,470</td><td><strong>15.10</strong></td><td>76,742,508</td><td>26,814,626</td><td>10m 32.1s</td><td>4,127 MB</td><td>76,742,508</td><td>26,814,626</td><td>56m 24.1s</td><td>9,693 MB</td><td class="win">5.35×</td><td class="win">57.4% less</td></tr></tbody></table></div>
 <section class="notes"><p><strong>Units:</strong> Gpx = billions of pixels (10⁹). Peak RAM is shown in MB as recorded in the original benchmark results. Faster by = GDAL time / Contrek time. Less RAM used = (1 − Contrek peak RAM / GDAL peak RAM) × 100%. Both columns describe Contrek improvements over GDAL.</p>
-<p><strong>Validation:</strong> Equal counts of exterior rings and holes do not, by themselves, prove identical polygon geometries. Some benchmark rows have small differences in ring counts (see asterisks).</p>
-</section>
-</main></body></html>
