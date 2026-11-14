@@ -14,6 +14,7 @@
 #include <stdexcept>
 #include <memory>
 #include <cstdio>
+#include <cmath>
 
 // Include GDAL & OGR Header
 #include "gdal_priv.h"
@@ -492,62 +493,75 @@ bool get_png_dimensions(const std::string& filepath, int& width, int& height) {
   return true;
 }
 
+
 int main(int argc, char* argv[]) {
   std::string image_path;
+
   for (int i = 1; i < argc; ++i) {
     std::string arg = argv[i];
-    if (arg == "--image" && i + 1 < argc) {
-      image_path = argv[++i];
-    } else if (arg == "--help" || arg == "-h") {
-      std::cout
-        << "Usage: " << argv[0]
-        << " [--image FILE_OR_PATH]\n";
+
+    if (arg == "--help" || arg == "-h") {
+      std::cout << "Usage: " << argv[0] << " --image FILE\n"
+                << "  --image FILE   Raster image in ../../images/ (required)\n"
+                << "  --help, -h     Show this help message\n";
       return 0;
     }
-  }
 
-  // Registers GDAL drivers once
-  GDALAllRegister();
-
-  std::vector<ImageInfo> images = {};
-
-  if (!image_path.empty()) {
-    std::cout <<  "Reading... " << image_path << std::endl;
-    ImageInfo user_info;
-    auto* info_ds = static_cast<GDALDataset*>(
-        GDALOpen(("../../images/" + image_path).c_str(), GA_ReadOnly));
-    if (info_ds) {
-      user_info.w = info_ds->GetRasterXSize();
-      user_info.h = info_ds->GetRasterYSize();
-      GDALClose(info_ds);
-      std::cout << "Given image dimension: " << user_info.w << "x" << user_info.h << " px\n";
-      user_info.name = image_path;
-      images.clear();
-      images.push_back(user_info);
+    if (arg == "--image") {
+      if (i + 1 >= argc || argv[i + 1][0] == '-') {
+        std::cerr << "[ERROR] --image requires a filename\n";
+        return 1;
+      }
+      image_path = argv[++i];
+    } else {
+      std::cerr << "[ERROR] Unknown argument: " << arg << "\n";
+      return 1;
     }
   }
 
-  std::vector<BenchResult> results;
-
-  for (auto &imgInfo : images) {
-    std::string path = "../../images/" + imgInfo.name;
-    std::cout << "=== Processing " << path << " ===" << std::endl;
-    
-    // --- CONTREK ---
-    auto contrek = run_contrek_isolated(path, imgInfo.name);
-
-    // --- GDAL POLYGONIZE (with GeoJSON Output) ---
-    auto gdal = run_gdal_isolated_multiclass(path, imgInfo.name);
-    
-    // --- STATS ---
-    results.push_back({
-      imgInfo.name,
-      contrek.time_ms,contrek.ram_mb,contrek.external,contrek.holes,
-      gdal.time_ms,gdal.ram_mb,gdal.external,gdal.holes,
-      imgInfo.w,
-      imgInfo.h
-    });
+  if (image_path.empty()) {
+    std::cerr << "[ERROR] Missing required argument: --image\n"
+              << "Usage: " << argv[0] << " --image FILE\n";
+    return 1;
   }
+
+  GDALAllRegister();
+
+  const std::string path = "../../images/" + image_path;
+
+  auto* info_ds = static_cast<GDALDataset*>(
+    GDALOpen(path.c_str(), GA_ReadOnly)
+  );
+
+  if (!info_ds) {
+    std::cerr << "[ERROR] Cannot open image: " << path << "\n";
+    return 1;
+  }
+
+  const int width = info_ds->GetRasterXSize();
+  const int height = info_ds->GetRasterYSize();
+  GDALClose(info_ds);
+
+  std::cout << "Reading: " << path << "\n"
+            << "Image dimensions: " << width << "x" << height << " px\n";
+
+  std::cout << "=== Processing " << path << " ===\n";
+
+  auto contrek = run_contrek_isolated(path, image_path);
+  auto gdal = run_gdal_isolated_multiclass(path, image_path);
+
+  std::vector<BenchResult> results;
+  results.push_back({
+    image_path,
+    contrek.time_ms, contrek.ram_mb,
+    contrek.external, contrek.holes,
+    gdal.time_ms, gdal.ram_mb,
+    gdal.external, gdal.holes,
+    width, height
+  });
+
+  // --- REPORT HTML ---
+
 
   // --- REPORT HTML ---
   std::ofstream html("cpp_geojson_benchmark_results.html");
@@ -579,7 +593,7 @@ int main(int argc, char* argv[]) {
        << "<th colspan='2'>RATIOS</th></tr>";
   html << "<tr><th>Ext.</th><th>Hole</th><th>Time</th><th>Time Better?</th><th>RAM</th><th>Ram Better?</th>"
        << "<th>Ext.</th><th>Hole</th><th>Time</th><th>Time Better?</th><th>RAM</th><th>Ram Better?</th>"
-       << "<th>Contrek Speedup</th><th>Contrek RAM Saving</th></tr>";
+       << "<th>Contrek Speed</th><th>Contrek RAM Usage</th></tr>";
   html << "</thead><tbody>";
 
   for (const auto& r : results) {
@@ -611,16 +625,35 @@ int main(int argc, char* argv[]) {
     html << "<td class='gdal-col'>" << (!ct_ram_win ? "<span class='winner-label winner-gd'>\u2713</span>" : "-") << "</td>";
 
     // --- RATIOS ---
-    html << "<td><span class='ratio-pill " << (speed_ratio < 1.0 ? "good" : "bad") << "'>"
-     << std::fixed << std::setprecision(2)
-     << (speed_ratio < 1.0 ? 1.0 / speed_ratio : speed_ratio)
-     << "&times; faster</span></td>";
+    if (r.c_time > 0 && r.g_time > 0) {
+      bool contrek_faster = r.c_time < r.g_time;
+      double ratio = contrek_faster
+        ? r.g_time / r.c_time
+        : r.c_time / r.g_time;
 
-    html << "<td><span class='ratio-pill " << (ram_ratio < 1.0 ? "good" : "bad") << "'>"
-     << std::fixed << std::setprecision(2)
-     << (ram_ratio < 1.0 ? 1.0 / ram_ratio : ram_ratio)
-     << "&times; less RAM</span></td>";
-    html << "</tr>";
+      html << "<td><span class='ratio-pill "
+           << (contrek_faster ? "good" : "bad") << "'>"
+           << std::fixed << std::setprecision(2)
+           << ratio
+           << (contrek_faster ? "&times; faster" : "&times; slower")
+           << "</span></td>";
+    } else {
+      html << "<td>N/A</td>";
+    }
+
+    if (r.c_ram > 0 && r.g_ram > 0) {
+      double saving = (1.0 - r.c_ram / r.g_ram) * 100.0;
+
+      html << "<td><span class='ratio-pill "
+           << (saving >= 0 ? "good" : "bad") << "'>"
+           << std::fixed << std::setprecision(1)
+           << std::abs(saving)
+           << (saving >= 0 ? "% less RAM" : "% more RAM")
+           << "</span></td>";
+    } else {
+      html << "<td>N/A</td>";
+    }
+
   }
 
   html << "</tbody></table></body></html>";
