@@ -29,13 +29,21 @@ RUN apt-get update && apt-get install -y \
     libswscale-dev \
     libtbb-dev \
     libeigen3-dev \
-    libgdal-dev \
-    gdal-bin \
+    software-properties-common \
     wget \
     curl \
     unzip \
     time \
     && rm -rf /var/lib/apt/lists/*
+
+# Pin GDAL runtime and C++ development headers to the benchmarked release.
+RUN add-apt-repository -y ppa:ubuntugis/ubuntugis-unstable && \
+    apt-get update && \
+    apt-get install -y --no-install-recommends \
+      'gdal-bin=3.11.4+dfsg-1~noble0' \
+      'libgdal-dev=3.11.4+dfsg-1~noble0' && \
+    test "$(gdal-config --version)" = "3.11.4" && \
+    rm -rf /var/lib/apt/lists/*
 
 # Custom OpenCV build (supports C++ and Python bindings)
 RUN git clone --branch 4.10.0 --depth 1 https://github.com/opencv/opencv.git /tmp/opencv && \
