@@ -10,6 +10,11 @@ Contrek's core is matcher-based: a matcher recognizes arbitrary pixel patterns. 
 
 Contributions, discussions, and ideas for improvement are welcome.
 
+## Test configuration
+
+- **GDAL version:** 3.11.4
+- **Contrek version:** 1.4.8
+
 ## Run the benchmarks
 
 ```bash
