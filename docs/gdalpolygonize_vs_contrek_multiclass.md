@@ -87,7 +87,7 @@ cd build
 
 The executable generates an HTML report named **cpp_geojson_benchmark_results.html** and two geojson files, one for Contrek and one for GDAL.
 
-## Performance results (AMD Ryzen 7 3700X 8 cores / 16 thread, 3.6 HHz)
+## Performance results (AMD Ryzen 7 3700X 8 cores / 16 threads, 3.6 GHz)
 
 The generated HTML report is available **[HERE](https://runout77.github.io/test_contrek/cpp_geojson_benchmark_results_multiclass.html)**
 
@@ -113,3 +113,16 @@ cd build
 
 Both implementations produced 443 exterior polygons and 280 holes across 6 raster classes.
 After transforming GDAL's georeferenced coordinates back to pixel coordinates, all 443 polygons were found to be topologically equivalent, including their holes. Shapely flagged the same 48 geometries as invalid in both outputs.
+
+
+## GeoJSON Output Validation
+
+The generated GeoJSON can be validated using GDAL's `ogrinfo` utility. For example if you got contrek_ESA_WorldCover_10m_2021_v200_S03W060_Map.tif.geojson.
+
+```bash
+ogrinfo --config OGR_GEOJSON_MAX_OBJ_SIZE 0 \
+  -ro -so -al \
+  contrek_ESA_WorldCover_10m_2021_v200_S03W060_Map.tif.geojson
+```
+
+The `OGR_GEOJSON_MAX_OBJ_SIZE=0` option disables GDAL's default maximum object size limit. This is necessary when processing large rasters that may produce very large individual polygons.
