@@ -123,7 +123,7 @@ PolyMetrics count_polygons_and_holes_gdal(const std::string& geojson_path) {
   return metrics;
 }
 
-ProcessResult* stream_progressive_png_image(const std::string& filepath, const std::string& geojson_filepath, uint32_t stripe_height) {
+ProcessResult* stream_progressive_tiff_image(const std::string& filepath, const std::string& geojson_filepath, uint32_t stripe_height) {
   ProcessResult* merged_result = nullptr;
 
   Options varguments = {
@@ -160,6 +160,15 @@ ProcessResult* stream_progressive_png_image(const std::string& filepath, const s
 
   std::vector<char> buffer(4 * 1024 * 1024);  // Buffer (4MB)
   shared_stream.rdbuf()->pubsetbuf(buffer.data(), buffer.size());
+
+  if (is_tiff) {
+    std::optional<GeoLocalization> geoloc;
+    const auto& tiff_source = static_cast<const TiffSource&>(source);
+    geoloc = tiff_source.geo_localization();
+    if (geoloc.has_value()) {
+      varguments["geo_localization"] = geoloc->to_options();
+    }
+  }
 
   GeoJsonStreamingMerger vmerger(0, varguments, &shared_stream);
 
@@ -224,7 +233,7 @@ EngineMetrics run_contrek_isolated(const std::string& path, const std::string& n
     EngineMetrics m{};
     const std::string output_path = "./contrek_" + name + ".geojson";
     double start = now_ms();
-    auto result = stream_progressive_png_image(path, output_path, 200);
+    auto result = stream_progressive_tiff_image(path, output_path, 200);
     m.time_ms = now_ms() - start;
     m.ram_mb = get_peak_rss();
     delete result;
