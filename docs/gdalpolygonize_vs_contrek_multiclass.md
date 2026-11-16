@@ -89,7 +89,7 @@ The executable generates an HTML report named **cpp_geojson_benchmark_results.ht
 
 ## Performance results (AMD Ryzen 7 3700X 8 cores / 16 thread, 3.6 HHz)
 
-[View multiclass benchmark results](benchmarks/contrek_vs_gdal_multiclass.html)
+The generated HTML report is available **[HERE](https://runout77.github.io/test_contrek/cpp_geojson_benchmark_results_multiclass.html)**
 
 
 ## Small-raster topology validation
