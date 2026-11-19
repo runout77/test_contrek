@@ -8,7 +8,7 @@
 - [Advanced Techniques & Demonstration Tools](docs/advanced_techniques.md)
 
 ### Benchmarks
-- **[NEW]** [GDALPolygonize vs Contrek Multiclass Benchmark](docs/gdalpolygonize_vs_contrek_multiclass.md)
+- **[ <u>NEW</u> ]** [GDALPolygonize vs Contrek MULTICLASS Benchmark](docs/gdalpolygonize_vs_contrek_multiclass.md)
 - [GDALPolygonize vs Contrek Singleclass Benchmark](docs/gdalpolygonize_vs_contrek.md)
 - [OpenCV Python vs Contrek Ruby comparison](docs/opencv_python_vs_contrek_ruby.md)
 - [OpenCV Python vs Contrek Python comparison](docs/opencv_vs_contrek_python.md)

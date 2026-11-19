@@ -83,9 +83,15 @@ cd test
 ./cpp_test.sh
 cd build
 ./gdal_test_multiclass --image ESA_WorldCover_10m_2021_v200_N42E009_Map.tif
+# or
+./gdal_test_multiclass --image ESA_WorldCover_10m_2021_v200_S03W060_Map.tif
+# or, for the much larger CONUS dataset (~15.1 billion pixels)
+./gdal_test_multiclass --image conus_2021_ccap_landcover.tif
 ```
 
 The executable generates an HTML report named **cpp_geojson_benchmark_results.html** and two geojson files, one for Contrek and one for GDAL.
+**Note:** The full CONUS benchmark takes approximately 90 minutes to complete, as it runs both Contrek and GDAL on a 15-billion-pixel raster.
+
 
 ## Performance results (AMD Ryzen 7 3700X 8 cores / 16 threads, 3.6 GHz)
 
