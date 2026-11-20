@@ -82,8 +82,9 @@ The following commands polygonize **all source band values** with 8-connectivity
 cd test
 ./cpp_test.sh
 cd build
+# for Italy
 ./gdal_test_multiclass --image ESA_WorldCover_10m_2021_v200_N42E009_Map.tif
-# or
+# or for Amazon
 ./gdal_test_multiclass --image ESA_WorldCover_10m_2021_v200_S03W060_Map.tif
 # or, for the much larger CONUS dataset (~15.1 billion pixels)
 ./gdal_test_multiclass --image conus_2021_ccap_landcover.tif
@@ -132,3 +133,46 @@ ogrinfo --config OGR_GEOJSON_MAX_OBJ_SIZE 0 \
 ```
 
 The `OGR_GEOJSON_MAX_OBJ_SIZE=0` option disables GDAL's default maximum object size limit. This is necessary when processing large rasters that may produce very large individual polygons.
+
+
+
+## GeoJSON Output Comparison
+
+Compare Contrek and GDAL outputs and generate a detailed discrepancy report.
+For example run this after have run test on ESA_WorldCover_10m_2021_v200_S03W060_Map.tif
+
+```bash
+python3 compare_geojson_memory.py \
+  build/contrek_ESA_WorldCover_10m_2021_v200_S03W060_Map.tif.geojson \
+  build/gdal_multiclass_ESA_WorldCover_10m_2021_v200_S03W060_Map.tif.geojson \
+  --report comparison
+```
+
+Outputs:
+- `comparison.txt` — summary and discrepancies.
+- `comparison.json` — structured results.
+
+The comparison ignores feature order, ring orientation, and starting vertices. No external Python dependencies required.
+
+For a more thorough topological comparison, install Shapely and Rasterio:
+
+```bash
+apt update
+apt install python3.12-venv
+rm -rf .venv
+python3 -m venv .venv
+source .venv/bin/activate
+python -m pip install shapely rasterio
+```
+Then run:
+
+```bash
+python3 compare_geojson_topology.py \
+  build/contrek_ESA_WorldCover_10m_2021_v200_S03W060_Map.tif.geojson \
+  build/gdal_multiclass_ESA_WorldCover_10m_2021_v200_S03W060_Map.tif.geojson \
+  --raster ../images/ESA_WorldCover_10m_2021_v200_S03W060_Map.tif \
+  --report comparison
+```
+
+On the 1.3-billion-pixel Amazon dataset, **351,856 out of 351,857 polygons (99.99972%)** matched topologically between Contrek and GDAL.
+Both produced exactly the same number of polygons (351,857), holes (286,500), and polygons per class. The single remaining discrepancy involved a polygon invalid in both outputs.

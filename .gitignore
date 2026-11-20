@@ -1,6 +1,7 @@
 test/output/*
 !test/output/.gitkeep
 test/build/*
+test/.venv/
 !test/build/.gitkeep
 test/contrek_core/*
 !test/contrek_core/.gitkeep
